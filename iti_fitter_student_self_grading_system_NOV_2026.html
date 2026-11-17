@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITI Fitter (1st Year, Points 1–11) — Student Self-Grading System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .rating-btn.active-0 { background-color: #475569; color: #ffffff; border-color: #475569; box-shadow: 0 2px 6px rgba(71, 85, 105, 0.25); }
+        .rating-btn.active-1 { background-color: #d97706; color: #ffffff; border-color: #d97706; box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25); }
+        .rating-btn.active-2 { background-color: #1d4ed8; color: #ffffff; border-color: #1d4ed8; box-shadow: 0 2px 6px rgba(29, 78, 216, 0.25); }
+        .rating-btn.active-3 { background-color: #059669; color: #ffffff; border-color: #059669; box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25); }
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff; }
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navigation & Branding Header -->
+    <header class="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white shadow-xl sticky top-0 z-40 border-b border-amber-500/30">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3.5">
+                <div class="bg-amber-500 text-slate-950 p-3 rounded-xl shadow-md font-bold text-xl flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-gears"></i>
+                </div>
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-[11px] font-bold text-amber-300 tracking-wide mb-1">
+                        CTS 3.0 &bull; NSQF Level 4 &bull; Trade: Fitter (1st Year, Points 1 to 11)
+                    </div>
+                    <h1 class="text-lg sm:text-2xl font-extrabold tracking-tight text-white">
+                        Student Self-Grading System
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-300 font-medium">
+                        Assess your practical competency across First Year Learning Outcomes (Points 1–11) and send your evaluation directly to your Admin on WhatsApp.
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2.5 w-full sm:w-auto justify-end no-print">
+                <button type="button" onclick="openResetModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-right text-amber-400"></i> Reset Form
+                </button>
+                <button type="button" onclick="openWhatsAppModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-bold rounded-xl transition flex items-center gap-2 shadow-lg shadow-emerald-950/40">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Submit via WhatsApp
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 w-full flex-grow grid grid-cols-1 lg:grid-cols-4 gap-7">
+
+        <!-- Left 3 Columns: Configuration & Points 1-11 Cards -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- Student & Admin Configuration Card -->
+            <section class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-200/90">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-100">
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center text-xs font-extrabold">01</span>
+                        Student &amp; Admin Configuration
+                    </h2>
+                    <span class="text-xs text-emerald-700 font-semibold flex items-center gap-1.5 bg-emerald-50 border border-emerald-200/70 px-3 py-1 rounded-full">
+                        <i class="fa-solid fa-floppy-disk"></i> Auto-saved to browser
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label for="studentName" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Student Full Name <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="studentName" oninput="saveState()" placeholder="e.g. Rahul Sharma" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm bg-slate-50/60 transition">
+                    </div>
+                    <div>
+                        <label for="studentRoll" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Roll / Registration No. <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" id="studentRoll" oninput="saveState()" placeholder="e.g. FIT/1Y/2026/042" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm bg-slate-50/60 transition">
+                    </div>
+                    <div>
+                        <label for="studentBatch" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Batch / Session
+                        </label>
+                        <input type="text" id="studentBatch" oninput="saveState()" value="Fitter 1st Year (2025-26)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm bg-slate-50/60 transition">
+                    </div>
+                    <div>
+                        <label for="studentTrade" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Trade &amp; Level
+                        </label>
+                        <input type="text" id="studentTrade" oninput="saveState()" value="Fitter — 1st Yr (NSQF-4)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm bg-slate-50/60 font-medium text-slate-800 transition">
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                    <div class="sm:col-span-2">
+                        <label for="adminPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Admin / Instructor WhatsApp Number (with Country Code, e.g. 919876543210) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-emerald-600 pointer-events-none">
+                                <i class="fa-brands fa-whatsapp text-base"></i>
+                            </span>
+                            <input type="tel" id="adminPhone" oninput="saveState()" placeholder="e.g. 919876543210" class="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm bg-emerald-50/30 font-semibold text-slate-900 transition">
+                        </div>
+                    </div>
+                    <div>
+                        <label for="assessmentDate" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                            Assessment Date
+                        </label>
+                        <input type="date" id="assessmentDate" oninput="saveState()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm bg-slate-50/60 transition">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Competency Rubric Legend -->
+            <section class="bg-slate-900 text-slate-100 rounded-2xl p-4 sm:p-5 shadow-sm border border-slate-800">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-2">
+                        <i class="fa-solid fa-ruler-combined"></i> Competency Grading Scale (0 to 3)
+                    </h3>
+                    <span class="text-[11px] text-slate-400 hidden sm:inline">Rate every assessment criterion point</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs">
+                    <div class="bg-slate-800/90 p-2.5 rounded-xl border border-slate-700 flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-slate-600 text-white font-bold flex items-center justify-center shrink-0">0</span>
+                        <div><strong class="text-slate-200 block">Not Started</strong><span class="text-slate-400 text-[11px]">Not practiced yet</span></div>
+                    </div>
+                    <div class="bg-slate-800/90 p-2.5 rounded-xl border border-amber-500/30 flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-amber-600 text-white font-bold flex items-center justify-center shrink-0">1</span>
+                        <div><strong class="text-amber-300 block">Beginner</strong><span class="text-slate-400 text-[11px]">Needs guidance</span></div>
+                    </div>
+                    <div class="bg-slate-800/90 p-2.5 rounded-xl border border-blue-500/30 flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-blue-700 text-white font-bold flex items-center justify-center shrink-0">2</span>
+                        <div><strong class="text-blue-300 block">Developing</strong><span class="text-slate-400 text-[11px]">Can perform with supervision</span></div>
+                    </div>
+                    <div class="bg-slate-800/90 p-2.5 rounded-xl border border-emerald-500/30 flex items-start gap-2.5">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center shrink-0">3</span>
+                        <div><strong class="text-emerald-300 block">Proficient</strong><span class="text-slate-400 text-[11px]">Independent &amp; accurate</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Bulk Selection Toolbar -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/90 flex flex-wrap items-center justify-between gap-3 no-print">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center text-xs font-extrabold">02</span>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-900">Learning Outcomes (Points 1 to 11)</h2>
+                        <p class="text-xs text-slate-500 font-medium" id="toolbarSelectionStatus">11 of 11 points selected</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="toggleAllSections(true)" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold rounded-xl transition">
+                        <i class="fa-solid fa-check-double mr-1"></i> Select All (11)
+                    </button>
+                    <button type="button" onclick="toggleAllSections(false)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition">
+                        <i class="fa-regular fa-square mr-1"></i> Deselect All
+                    </button>
+                    <button type="button" onclick="expandCollapseAll(true)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+                        <i class="fa-solid fa-angles-down"></i> Expand All
+                    </button>
+                    <button type="button" onclick="expandCollapseAll(false)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition">
+                        <i class="fa-solid fa-angles-up"></i> Collapse All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Learning Outcomes Cards Container (Points 1 to 11) -->
+            <div id="outcomesContainer" class="space-y-4">
+                <!-- Populated dynamically via JS -->
+            </div>
+
+        </div>
+
+        <!-- Right 1 Column: Sticky Live Scoring & WhatsApp Dispatch Summary -->
+        <aside class="lg:col-span-1 space-y-6">
+            <div class="sticky top-24 bg-white rounded-2xl p-5 sm:p-6 shadow-md border border-slate-200/90 space-y-5">
+                <div>
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100">
+                        <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider">Live Assessment Score</h3>
+                        <span class="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-bold">1st Year</span>
+                    </div>
+
+                    <div class="bg-slate-900 text-white rounded-xl p-3.5 mb-4 flex items-center justify-between shadow-xs">
+                        <span class="text-xs font-semibold text-slate-300">Selected Points</span>
+                        <span class="text-sm font-extrabold text-amber-400"><span id="selectedSectionsCount">11</span> / 11 Selected</span>
+                    </div>
+
+                    <div class="space-y-2 mb-5">
+                        <div class="flex justify-between text-xs font-bold">
+                            <span class="text-slate-600">Selected Mastery %</span>
+                            <span id="percentageText" class="text-blue-700 text-sm">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-200">
+                            <div id="progressBar" class="bg-gradient-to-r from-blue-700 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-center">
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-0.5">Selected Score</span>
+                            <span id="obtainedScoreText" class="text-xl font-extrabold text-slate-900">0</span>
+                            <span class="text-xs font-semibold text-slate-400"> / <span id="maxScoreText">0</span></span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 text-center">
+                            <span class="block text-[10px] font-bold text-slate-500 uppercase tracking-wide mb-0.5">Rated Criteria</span>
+                            <span id="assessedCountText" class="text-xl font-extrabold text-blue-700">0</span>
+                            <span class="text-xs font-semibold text-slate-400"> / <span id="totalCriteriaText">0</span></span>
+                        </div>
+                    </div>
+
+                    <div id="gradeBadgeContainer" class="bg-slate-100 rounded-xl p-3.5 text-center border border-slate-200 transition-all mb-4">
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-0.5">Competency Grade</span>
+                        <span id="gradeText" class="text-sm font-extrabold text-slate-700">Awaiting Ratings</span>
+                    </div>
+
+                    <div class="text-xs text-slate-600 bg-amber-50/70 rounded-xl p-3 border border-amber-200/70 space-y-2">
+                        <div class="flex justify-between items-center font-semibold">
+                            <span class="text-slate-700">Overall Progress (Pts 1–11):</span>
+                            <span id="overallCurriculumText" class="font-bold text-slate-900">0 / 0 (0%)</span>
+                        </div>
+                        <div class="w-full bg-amber-100/90 rounded-full h-2 overflow-hidden">
+                            <div id="overallProgressBar" class="bg-amber-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div class="space-y-2.5 no-print">
+                    <button type="button" onclick="openWhatsAppModal()" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Submit Selected via WhatsApp
+                    </button>
+                    <button type="button" onclick="openWhatsAppModal()" class="w-full py-2.5 px-4 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold rounded-xl transition flex items-center justify-center gap-2 text-xs sm:text-sm">
+                        <i class="fa-regular fa-file-lines"></i> Preview &amp; Copy Report
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Preview & WhatsApp Dispatch Modal -->
+    <div id="whatsappModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <h3 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-xl"></i> WhatsApp Assessment Report Preview
+                </h3>
+                <button type="button" onclick="closeWhatsAppModal()" class="text-slate-400 hover:text-slate-700 p-1.5 rounded-lg hover:bg-slate-100">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="modalValidationBanner" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-semibold flex items-start gap-2.5">
+                <i class="fa-solid fa-triangle-exclamation text-sm mt-0.5 shrink-0"></i>
+                <span id="modalValidationMsg">Please complete required fields.</span>
+            </div>
+
+            <div>
+                <label for="modalAdminPhone" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                    Admin WhatsApp Number (with Country Code, e.g. 919876543210) <span class="text-red-500">*</span>
+                </label>
+                <input type="tel" id="modalAdminPhone" oninput="syncAdminPhone(this.value)" placeholder="919876543210" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-600 text-sm font-semibold">
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label for="previewReportTextarea" class="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                        Structured Report (Selected Points Only)
+                    </label>
+                    <button type="button" onclick="copyReportText()" class="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1">
+                        <i class="fa-regular fa-copy"></i> Copy Report
+                    </button>
+                </div>
+                <textarea id="previewReportTextarea" readonly rows="10" class="w-full bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-800 font-mono leading-relaxed focus:outline-none resize-none"></textarea>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2.5 pt-2">
+                <button type="button" onclick="closeWhatsAppModal()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">
+                    Close
+                </button>
+                <button type="button" onclick="copyReportText()" class="py-2.5 px-4 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 font-bold rounded-xl text-sm transition flex items-center justify-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i> Copy Report
+                </button>
+                <button type="button" onclick="sendToWhatsApp()" class="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Send via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-900">Reset All Scores?</h3>
+            <p class="text-sm text-slate-600">This will clear all ratings and section remarks for Points 1 to 11. Student details and phone numbers will remain saved.</p>
+            <div class="flex gap-3 pt-2">
+                <button type="button" onclick="closeResetModal()" class="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition">Cancel</button>
+                <button type="button" onclick="confirmReset()" class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm transition">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Banner -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 z-50 text-sm font-semibold transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2.5">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage">Action completed</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-6 border-t border-slate-800 text-center text-xs mt-12">
+        <div class="max-w-7xl mx-auto px-4 space-y-1">
+            <p class="font-semibold text-slate-300">ITI Fitter 1st Year (Points 1 to 11) — Student Self-Grading System</p>
+            <p>Aligned with CTS 3.0 First Year Fitter Trade-Specific Learning Outcomes &amp; Assessment Criteria</p>
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        const learningOutcomes = [
+            {
+                pointNo: 1,
+                title: "Plan and organize the work to make job as per specification applying different types of basic fitting operation and check for dimensional accuracy following safety precautions.",
+                criteria: [
+                    "Plan & Identify tools, instruments and equipment for marking and make this available for use in a timely manner.",
+                    "Select raw material and visually inspect for defects.",
+                    "Mark as per specification applying desired mathematical calculation and observing standard procedure.",
+                    "Measure all dimensions in accordance with standard specifications and tolerances.",
+                    "Identify Hand Tools for different fitting operations (marking, hacksawing, chiselling, filing, drilling, taping, grinding) and make available.",
+                    "Prepare the job for Hacksawing, chiselling, filing, drilling, tapping, grinding.",
+                    "Perform basic fitting operations viz., Hacksawing, filing, drilling, tapping and grinding to close tolerance (±0.25mm) as per specification.",
+                    "Observe safety procedure during above operation as per standard norms and company guidelines.",
+                    "Check for dimensional accuracy as per standard procedure.",
+                    "Avoid waste, ascertain unused materials and components for disposal in an environmentally appropriate manner."
+                ]
+            },
+            {
+                pointNo: 2,
+                title: "Manufacture simple sheet metal items as per drawing and join them by soldering, brazing and riveting.",
+                criteria: [
+                    "Identify Hand Tools for Sheet Metal work, Soldering, Brazing & riveting and make these available in a timely manner.",
+                    "Mark and develop various forms as per drawing using sheet metals.",
+                    "Make simple items with sheet metal as per drawing.",
+                    "Prepare the job for Soldering, Brazing & riveting.",
+                    "Identify different types of rivets and use as per requirement.",
+                    "Identify tools for drilling and use these tools.",
+                    "Mark according to drawing and drill through holes on the job.",
+                    "Solder, Braze and Rivet to prepare a job as per given drawing / sample following standard practices.",
+                    "Observe safety procedure during riveting as per standard norms and company guidelines."
+                ]
+            },
+            {
+                pointNo: 3,
+                title: "Join metal components by observing riveting standard procedure.",
+                criteria: [
+                    "Identify Tools and equipment for riveting and make these available for use in a timely manner.",
+                    "Prepare the job for lap and butt joint.",
+                    "Identify different types of rivets and use as per requirement.",
+                    "Identify tools for drilling and use these tools.",
+                    "Mark according to drawing and drill through holes.",
+                    "Rivet to prepare a job as per given drawing / sample following standard practices.",
+                    "Observe safety procedure during riveting as per standard norms."
+                ]
+            },
+            {
+                pointNo: 4,
+                title: "Join metal component by observing arc welding standard procedure.",
+                criteria: [
+                    "Identify different components/parts of arc welding machine, collect desired information and set each part as per standard procedure.",
+                    "Observe safety / precaution during operation.",
+                    "Select appropriate material & plan for arc welding.",
+                    "Weld metal parts / mechanical components as per specification observing standard procedure.",
+                    "Check joined part portion to ascertain proper welding."
+                ]
+            },
+            {
+                pointNo: 5,
+                title: "Cut and join metal component by gas (oxyacetylene).",
+                criteria: [
+                    "Identify different components/parts of Gas (oxyacetylene) machine, collect information and set parts as per standard procedure.",
+                    "Observe safety / precaution during operation.",
+                    "Select appropriate material & plan for gas cutting & joining operation.",
+                    "Cut & join metal parts / mechanical components as per specification observing standard procedure.",
+                    "Check cut portion / joined part to ascertain proper execution."
+                ]
+            },
+            {
+                pointNo: 6,
+                title: "Produce components by different operations and check accuracy using appropriate measuring instruments (Drilling, Reaming, Taping, Dieing; Vernier, Screw Gauge, Micrometer).",
+                criteria: [
+                    "Ascertain and select tools and materials for the job and make this available in a timely manner.",
+                    "Plan work in compliance with standard safety norms.",
+                    "Produce component by observing standard procedure.",
+                    "Check the dimensions of the produced components using Vernier, Screw Gauge, and Micrometer to ensure limits are within prescribed limits.",
+                    "Avoid waste, ascertain unused materials and components for proper disposal."
+                ]
+            },
+            {
+                pointNo: 7,
+                title: "Make different fit of components for assembling as per required tolerance observing principle of interchangeability and check for functionality (Sliding, Angular, Step, T, Square, Profile fit; ±0.04 mm tolerance, 30 min angular).",
+                criteria: [
+                    "Recognize general concept of Limits, Fits and tolerance necessary for fitting applications.",
+                    "Ascertain and select tools and materials for the job and set up workplace with due consideration.",
+                    "Plan work in compliance with standard safety norms and demonstrate team solutions.",
+                    "Make components according to specification for different fit ensuring interchangeability.",
+                    "Assemble components applying practical skills to ensure proper fit and check functionality."
+                ]
+            },
+            {
+                pointNo: 8,
+                title: "Produce components involving different operations on lathe observing standard procedure and check for accuracy (facing, plain turning, step turning, chamfering, parting, shoulder turn, grooving, knurling, boring, taper turning, external threading).",
+                criteria: [
+                    "Ascertain basic working principles and safety aspects of lathe machine.",
+                    "Understand functional application of different levers, stoppers, adjustments, lubrication points.",
+                    "Identify different work and tool holding devices and mount with required alignment.",
+                    "Solve problems by applying basic methods and observe safety procedures during mounting.",
+                    "Produce components observing standard procedure and check accuracy using appropriate gauges."
+                ]
+            },
+            {
+                pointNo: 9,
+                title: "Plan & perform simple repair, overhauling of different machines (Drill Machine, Power Saw, Bench Grinder and Lathe) and check for functionality.",
+                criteria: [
+                    "Ascertain and select tools and materials for repair and overhauling in a timely manner.",
+                    "Plan work in compliance with standard safety norms.",
+                    "Select specific parts to be repaired and ascertain appropriate material and estimated time.",
+                    "Repair, overhaul and assemble parts in the machine with the help of blueprint.",
+                    "Check for functionality, ascertain faults in case of improper function, and rectify assembly faults."
+                ]
+            },
+            {
+                pointNo: 10,
+                title: "Read and apply engineering drawing for different application in the field of work.",
+                criteria: [
+                    "Read & interpret the information on drawings and apply in executing practical work.",
+                    "Read & analyze the specification to ascertain material requirement, tools, and assembly parameters.",
+                    "Encounter drawings with missing/unspecified key information and make own calculations to fill in missing dimensions."
+                ]
+            },
+            {
+                pointNo: 11,
+                title: "Demonstrate basic mathematical concept and principles to perform practical operations. Understand and explain basic science in the field of study.",
+                criteria: [
+                    "Solve different mathematical problems relevant to the Fitter trade.",
+                    "Explain concepts of basic science related to the field of study."
+                ]
+            }
+        ];
+
+        const STORAGE_KEY = 'iti_fitter_1st_yr_pts1_11_v1';
+
+        function buildDefaultSelections() {
+            const sel = {};
+            const exp = {};
+            learningOutcomes.forEach((_, idx) => {
+                sel[idx] = true;
+                exp[idx] = idx < 2;
+            });
+            return { sel, exp };
+        }
+
+        const defaults = buildDefaultSelections();
+
+        let state = {
+            selectedSections: defaults.sel,
+            expandedSections: defaults.exp,
+            ratings: {}, // { "oIdx-cIdx": rating }
+            remarks: {}, // { oIdx: remark }
+            studentName: '',
+            studentRoll: '',
+            studentBatch: 'Fitter 1st Year (2025-26)',
+            studentTrade: 'Fitter — 1st Yr (NSQF-4)',
+            adminPhone: '',
+            assessmentDate: new Date().toISOString().split('T')[0]
+        };
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    state = { ...state, ...parsed };
+                }
+            } catch (err) {
+                console.error("Error reading localStorage:", err);
+            }
+
+            document.getElementById('studentName').value = state.studentName || '';
+            document.getElementById('studentRoll').value = state.studentRoll || '';
+            document.getElementById('studentBatch').value = state.studentBatch || 'Fitter 1st Year (2025-26)';
+            document.getElementById('studentTrade').value = state.studentTrade || 'Fitter — 1st Yr (NSQF-4)';
+            document.getElementById('adminPhone').value = state.adminPhone || '';
+            document.getElementById('assessmentDate').value = state.assessmentDate || new Date().toISOString().split('T')[0];
+        }
+
+        function saveState() {
+            state.studentName = document.getElementById('studentName').value;
+            state.studentRoll = document.getElementById('studentRoll').value;
+            state.studentBatch = document.getElementById('studentBatch').value;
+            state.studentTrade = document.getElementById('studentTrade').value;
+            state.adminPhone = document.getElementById('adminPhone').value;
+            state.assessmentDate = document.getElementById('assessmentDate').value;
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (err) {
+                console.error("Error writing localStorage:", err);
+            }
+        }
+
+        function toggleSectionSelection(oIdx) {
+            state.selectedSections[oIdx] = !state.selectedSections[oIdx];
+            if (state.selectedSections[oIdx]) {
+                state.expandedSections[oIdx] = true;
+            }
+            saveState();
+            renderOutcomes();
+        }
+
+        function toggleSectionExpand(oIdx) {
+            state.expandedSections[oIdx] = !state.expandedSections[oIdx];
+            saveState();
+            renderOutcomes();
+        }
+
+        function toggleAllSections(selectAll) {
+            learningOutcomes.forEach((_, idx) => {
+                state.selectedSections[idx] = selectAll;
+                if (selectAll) {
+                    state.expandedSections[idx] = true;
+                }
+            });
+            saveState();
+            renderOutcomes();
+            showToast(selectAll ? "All 11 points selected" : "All points deselected");
+        }
+
+        function expandCollapseAll(expand) {
+            learningOutcomes.forEach((_, idx) => {
+                state.expandedSections[idx] = expand;
+            });
+            saveState();
+            renderOutcomes();
+        }
+
+        function setRating(oIdx, cIdx, scoreVal) {
+            if (!state.selectedSections[oIdx]) {
+                state.selectedSections[oIdx] = true;
+                state.expandedSections[oIdx] = true;
+            }
+            const key = `${oIdx}-${cIdx}`;
+            if (state.ratings[key] === scoreVal) {
+                delete state.ratings[key];
+            } else {
+                state.ratings[key] = scoreVal;
+            }
+            saveState();
+            renderOutcomes();
+        }
+
+        function updateRemark(oIdx, text) {
+            state.remarks[oIdx] = text;
+            saveState();
+        }
+
+        function getSectionStats(oIdx) {
+            const outcome = learningOutcomes[oIdx];
+            let score = 0;
+            let ratedCount = 0;
+            const totalPoints = outcome.criteria.length;
+            const maxScore = totalPoints * 3;
+
+            outcome.criteria.forEach((_, cIdx) => {
+                const key = `${oIdx}-${cIdx}`;
+                if (state.ratings[key] !== undefined) {
+                    score += state.ratings[key];
+                    ratedCount++;
+                }
+            });
+
+            const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+            return { score, maxScore, ratedCount, totalPoints, pct };
+        }
+
+        function renderOutcomes() {
+            const container = document.getElementById('outcomesContainer');
+            let html = '';
+
+            learningOutcomes.forEach((outcome, oIdx) => {
+                const isSelected = !!state.selectedSections[oIdx];
+                const isExpanded = !!state.expandedSections[oIdx];
+                const stats = getSectionStats(oIdx);
+
+                const wrapperStyle = isSelected
+                    ? "bg-white border-blue-500/70 ring-2 ring-blue-600/10 shadow-sm"
+                    : "bg-slate-50 border-slate-200/80 opacity-80 hover:opacity-100";
+
+                html += `
+                    <article class="rounded-2xl border transition-all duration-200 overflow-hidden ${wrapperStyle}">
+                        <div class="p-4 sm:p-5 flex items-start sm:items-center justify-between gap-3 ${isSelected ? 'bg-blue-50/35' : ''}">
+                            <div class="flex items-start gap-3.5 flex-1 min-w-0">
+                                <label class="relative flex items-center cursor-pointer mt-1 shrink-0" title="Select Point ${outcome.pointNo} for submission">
+                                    <input type="checkbox" onchange="toggleSectionSelection(${oIdx})" ${isSelected ? 'checked' : ''} class="w-5 h-5 rounded-md border-slate-300 text-blue-700 focus:ring-blue-600 cursor-pointer">
+                                </label>
+
+                                <div onclick="toggleSectionExpand(${oIdx})" class="cursor-pointer flex-1 min-w-0 space-y-1.5">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="px-2.5 py-0.5 rounded-lg text-xs font-extrabold tracking-wide ${isSelected ? 'bg-slate-900 text-amber-400' : 'bg-slate-200 text-slate-700'}">
+                                            Point ${outcome.pointNo}
+                                        </span>
+                                        <span class="text-xs font-semibold text-slate-600 bg-white px-2.5 py-0.5 rounded-lg border border-slate-200">
+                                            Score: <strong class="text-slate-900">${stats.score}/${stats.maxScore}</strong> (${stats.pct}%) &bull; Rated: ${stats.ratedCount}/${stats.totalPoints}
+                                        </span>
+                                    </div>
+                                    <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                                        ${outcome.title}
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="toggleSectionExpand(${oIdx})" class="p-2 rounded-xl hover:bg-slate-200/70 text-slate-500 transition shrink-0">
+                                <i class="fa-solid ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+                            </button>
+                        </div>
+
+                        ${isExpanded ? `
+                        <div class="p-4 sm:p-6 pt-3 border-t border-slate-100 bg-white space-y-4">
+                            <div class="divide-y divide-slate-100">
+                                ${outcome.criteria.map((crit, cIdx) => {
+                                    const key = `${oIdx}-${cIdx}`;
+                                    const hasRating = state.ratings[key] !== undefined;
+                                    const val = state.ratings[key];
+
+                                    return `
+                                        <div class="py-3.5 first:pt-1 last:pb-1 flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+                                            <div class="text-sm text-slate-700 pr-2 flex items-start gap-2.5">
+                                                <span class="text-xs font-extrabold text-blue-800 bg-blue-50 border border-blue-200/70 px-2 py-0.5 rounded-md shrink-0 mt-0.5">
+                                                    ${outcome.pointNo}.${cIdx + 1}
+                                                </span>
+                                                <span class="leading-relaxed">${crit}</span>
+                                            </div>
+                                            <div class="grid grid-cols-2 sm:grid-cols-4 xl:flex items-center gap-1.5 shrink-0">
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 0)" class="rating-btn px-2.5 py-1.5 text-xs font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition ${hasRating && val === 0 ? 'active-0' : 'bg-white'}">0: Not Started</button>
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 1)" class="rating-btn px-2.5 py-1.5 text-xs font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-700 transition ${hasRating && val === 1 ? 'active-1' : 'bg-white'}">1: Beginner</button>
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 2)" class="rating-btn px-2.5 py-1.5 text-xs font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition ${hasRating && val === 2 ? 'active-2' : 'bg-white'}">2: Developing</button>
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 3)" class="rating-btn px-2.5 py-1.5 text-xs font-bold rounded-lg border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition ${hasRating && val === 3 ? 'active-3' : 'bg-white'}">3: Proficient</button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+
+                            <div class="pt-3 border-t border-slate-100">
+                                <label class="block text-xs font-bold text-slate-500 mb-1.5">
+                                    <i class="fa-solid fa-pen-to-square text-amber-600 mr-1"></i> Practical Remarks / Job Notes (Point ${outcome.pointNo}) — Optional:
+                                </label>
+                                <input type="text" value="${(state.remarks[oIdx] || '').replace(/"/g, '&quot;')}" oninput="updateRemark(${oIdx}, this.value)" placeholder="e.g. Completed fitting within ±0.25mm tolerance, observed safety norms..." class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-xs bg-slate-50/70">
+                            </div>
+                        </div>
+                        ` : ''}
+                    </article>
+                `;
+            });
+
+            container.innerHTML = html;
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            let selectedCount = 0;
+            let selObtained = 0;
+            let selMaxScore = 0;
+            let selRatedPoints = 0;
+            let selTotalPoints = 0;
+
+            let allObtained = 0;
+            let allMaxScore = 0;
+
+            learningOutcomes.forEach((outcome, oIdx) => {
+                const stats = getSectionStats(oIdx);
+                allObtained += stats.score;
+                allMaxScore += stats.maxScore;
+
+                if (state.selectedSections[oIdx]) {
+                    selectedCount++;
+                    selObtained += stats.score;
+                    selMaxScore += stats.maxScore;
+                    selRatedPoints += stats.ratedCount;
+                    selTotalPoints += stats.totalPoints;
+                }
+            });
+
+            const selPct = selMaxScore > 0 ? Math.round((selObtained / selMaxScore) * 100) : 0;
+            const allPct = allMaxScore > 0 ? Math.round((allObtained / allMaxScore) * 100) : 0;
+
+            document.getElementById('toolbarSelectionStatus').innerText = `${selectedCount} of ${learningOutcomes.length} points selected`;
+            document.getElementById('selectedSectionsCount').innerText = selectedCount;
+            document.getElementById('obtainedScoreText').innerText = selObtained;
+            document.getElementById('maxScoreText').innerText = selMaxScore;
+            document.getElementById('assessedCountText').innerText = selRatedPoints;
+            document.getElementById('totalCriteriaText').innerText = selTotalPoints;
+            document.getElementById('percentageText').innerText = selPct + '%';
+            document.getElementById('progressBar').style.width = selPct + '%';
+            document.getElementById('overallCurriculumText').innerText = `${allObtained} / ${allMaxScore} (${allPct}%)`;
+            document.getElementById('overallProgressBar').style.width = allPct + '%';
+
+            const badge = document.getElementById('gradeBadgeContainer');
+            const gradeText = document.getElementById('gradeText');
+
+            if (selectedCount === 0) {
+                badge.className = "bg-slate-100 rounded-xl p-3.5 text-center border border-slate-200 transition-all mb-4";
+                gradeText.className = "text-sm font-extrabold text-slate-500";
+                gradeText.innerText = "No Points Selected";
+            } else if (selRatedPoints === 0) {
+                badge.className = "bg-slate-100 rounded-xl p-3.5 text-center border border-slate-200 transition-all mb-4";
+                gradeText.className = "text-sm font-extrabold text-slate-700";
+                gradeText.innerText = "Awaiting Ratings";
+            } else if (selPct >= 85) {
+                badge.className = "bg-emerald-50 rounded-xl p-3.5 text-center border border-emerald-200 transition-all mb-4";
+                gradeText.className = "text-sm font-extrabold text-emerald-700";
+                gradeText.innerText = "Distinction (≥85%)";
+            } else if (selPct >= 70) {
+                badge.className = "bg-blue-50 rounded-xl p-3.5 text-center border border-blue-200 transition-all mb-4";
+                gradeText.className = "text-sm font-extrabold text-blue-700";
+                gradeText.innerText = "First Class (≥70%)";
+            } else if (selPct >= 50) {
+                badge.className = "bg-amber-50 rounded-xl p-3.5 text-center border border-amber-200 transition-all mb-4";
+                gradeText.className = "text-sm font-extrabold text-amber-700";
+                gradeText.innerText = "Competent (≥50%)";
+            } else {
+                badge.className = "bg-red-50 rounded-xl p-3.5 text-center border border-red-200 transition-all mb-4";
+                gradeText.className = "text-sm font-extrabold text-red-700";
+                gradeText.innerText = "Needs Practice (<50%)";
+            }
+        }
+
+        function getGradeLabel(selectedCount, selRatedPoints, selPct) {
+            if (selectedCount === 0 || selRatedPoints === 0) return "Unrated";
+            if (selPct >= 85) return "Distinction (≥85%)";
+            if (selPct >= 70) return "First Class (≥70%)";
+            if (selPct >= 50) return "Competent (≥50%)";
+            return "Needs Practice (<50%)";
+        }
+
+        function generateWhatsAppReport() {
+            const name = document.getElementById('studentName').value.trim() || "Not Provided";
+            const roll = document.getElementById('studentRoll').value.trim() || "Not Provided";
+            const batch = document.getElementById('studentBatch').value.trim() || "Fitter 1st Year (2025-26)";
+            const trade = document.getElementById('studentTrade').value.trim() || "Fitter — 1st Yr (NSQF-4)";
+            const date = document.getElementById('assessmentDate').value || new Date().toISOString().split('T')[0];
+
+            const ratingLabels = {
+                0: "0 - Not Started",
+                1: "1 - Beginner",
+                2: "2 - Developing",
+                3: "3 - Proficient"
+            };
+
+            let selObtained = 0;
+            let selMaxScore = 0;
+            let selRatedPoints = 0;
+            let selTotalPoints = 0;
+            let selectedIndices = [];
+
+            learningOutcomes.forEach((_, oIdx) => {
+                if (state.selectedSections[oIdx]) {
+                    selectedIndices.push(oIdx);
+                    const stats = getSectionStats(oIdx);
+                    selObtained += stats.score;
+                    selMaxScore += stats.maxScore;
+                    selRatedPoints += stats.ratedCount;
+                    selTotalPoints += stats.totalPoints;
+                }
+            });
+
+            const selPct = selMaxScore > 0 ? Math.round((selObtained / selMaxScore) * 100) : 0;
+            const gradeStr = getGradeLabel(selectedIndices.length, selRatedPoints, selPct);
+
+            let msg = `⚙️ *ITI FITTER 1ST YEAR (POINTS 1–11) REPORT* ⚙️\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `👤 *Student Name:* ${name}\n`;
+            msg += `🆔 *Roll / Reg No.:* ${roll}\n`;
+            msg += `🛠️ *Trade:* ${trade}\n`;
+            msg += `🎓 *Batch:* ${batch}\n`;
+            msg += `📅 *Date:* ${date}\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `📊 *SUMMARY*\n`;
+            msg += `• *Points Submitted:* ${selectedIndices.length} / ${learningOutcomes.length}\n`;
+            msg += `• *Total Score:* ${selObtained} / ${selMaxScore} (*${selPct}%*)\n`;
+            msg += `• *Criteria Rated:* ${selRatedPoints} / ${selTotalPoints}\n`;
+            msg += `• *Competency Grade:* *${gradeStr}*\n\n`;
+
+            selectedIndices.forEach((oIdx) => {
+                const outcome = learningOutcomes[oIdx];
+                const stats = getSectionStats(oIdx);
+                msg += `📌 *Point No. ${outcome.pointNo}*\n`;
+                msg += `${outcome.title}\n`;
+                msg += `   ➤ *Subtotal:* ${stats.score}/${stats.maxScore} (${stats.pct}%)\n`;
+
+                outcome.criteria.forEach((crit, cIdx) => {
+                    const key = `${oIdx}-${cIdx}`;
+                    const val = state.ratings[key];
+                    const statusText = val !== undefined ? ratingLabels[val] : "Unrated";
+                    msg += `   • ${outcome.pointNo}.${cIdx + 1} ${crit} ➔ *[${statusText}]*\n`;
+                });
+
+                if (state.remarks[oIdx] && state.remarks[oIdx].trim() !== '') {
+                    msg += `   📝 _Job Notes:_ ${state.remarks[oIdx].trim()}\n`;
+                }
+                msg += `\n`;
+            });
+
+            msg += `_Scale: 0=Not Started | 1=Beginner | 2=Developing | 3=Proficient_`;
+            return msg;
+        }
+
+        function validateSubmissionInputs() {
+            const name = document.getElementById('studentName').value.trim();
+            const roll = document.getElementById('studentRoll').value.trim();
+            const rawPhone = document.getElementById('adminPhone').value.trim();
+            const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+            const selectedCount = Object.values(state.selectedSections).filter(Boolean).length;
+
+            if (selectedCount === 0) return "Please select at least 1 point before submitting.";
+            if (!name) return "Student Full Name is required.";
+            if (!roll) return "Roll / Registration No. is required.";
+            if (!cleanPhone || cleanPhone.length < 10) return "Valid Admin WhatsApp Number with country code (e.g. 919876543210) is required.";
+            return null;
+        }
+
+        function openWhatsAppModal() {
+            document.getElementById('modalAdminPhone').value = document.getElementById('adminPhone').value.trim();
+            document.getElementById('previewReportTextarea').value = generateWhatsAppReport();
+
+            const banner = document.getElementById('modalValidationBanner');
+            const bannerMsg = document.getElementById('modalValidationMsg');
+            const errorMsg = validateSubmissionInputs();
+
+            if (errorMsg) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = errorMsg;
+            } else {
+                banner.classList.add('hidden');
+            }
+
+            document.getElementById('whatsappModal').classList.remove('hidden');
+        }
+
+        function closeWhatsAppModal() {
+            document.getElementById('whatsappModal').classList.add('hidden');
+        }
+
+        function syncAdminPhone(val) {
+            document.getElementById('adminPhone').value = val;
+            saveState();
+            const banner = document.getElementById('modalValidationBanner');
+            const bannerMsg = document.getElementById('modalValidationMsg');
+            const errorMsg = validateSubmissionInputs();
+            if (errorMsg) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = errorMsg;
+            } else {
+                banner.classList.add('hidden');
+            }
+        }
+
+        function copyReportText() {
+            const textarea = document.getElementById('previewReportTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast("Report copied to clipboard!");
+            } catch (err) {
+                showToast("Unable to copy text automatically.");
+            }
+        }
+
+        function sendToWhatsApp() {
+            const errorMsg = validateSubmissionInputs();
+            const banner = document.getElementById('modalValidationBanner');
+            const bannerMsg = document.getElementById('modalValidationMsg');
+
+            if (errorMsg) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = errorMsg;
+                return;
+            }
+
+            banner.classList.add('hidden');
+            const cleanPhone = document.getElementById('modalAdminPhone').value.trim().replace(/[^0-9]/g, '');
+            const reportText = generateWhatsAppReport();
+            const encoded = encodeURIComponent(reportText);
+            const waUrl = `https://wa.me/${cleanPhone}?text=${encoded}`;
+
+            window.open(waUrl, '_blank');
+            closeWhatsAppModal();
+            showToast("Opening WhatsApp with assessment report...");
+        }
+
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function confirmReset() {
+            const resetDefs = buildDefaultSelections();
+            state.ratings = {};
+            state.remarks = {};
+            state.selectedSections = resetDefs.sel;
+            state.expandedSections = resetDefs.exp;
+            saveState();
+            renderOutcomes();
+            closeResetModal();
+            showToast("Form ratings & remarks cleared");
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = message;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-24', 'opacity-0');
+            }, 3000);
+        }
+
+        window.onload = function() {
+            loadState();
+            renderOutcomes();
+        };
+    </script>
+</body>
+</html>

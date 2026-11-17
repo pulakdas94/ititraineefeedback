@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITI Fitter 2nd Year (Points 12–22) Student Self-Grading & WhatsApp Dispatch</title>
+    <style>
+        :root {
+            --primary-color: #1a56db;
+            --primary-dark: #1e429f;
+            --secondary-color: #0e9f6e;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        .student-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            color: #4b5563;
+        }
+        .form-group input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+        }
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: var(--primary-dark);
+        }
+        .btn-success {
+            background-color: var(--secondary-color);
+        }
+        .btn-success:hover {
+            background-color: #046c4e;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+        .section-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
+        .section-card.selected {
+            border-left: 5px solid var(--primary-color);
+        }
+        .section-header {
+            padding: 15px 20px;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        .section-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .section-title-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .section-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        .section-body {
+            padding: 20px;
+        }
+        .criteria-item {
+            padding: 12px 0;
+            border-bottom: 1px dashed var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .criteria-item:last-child {
+            border-bottom: none;
+        }
+        .criteria-text {
+            font-size: 0.95rem;
+            color: #374151;
+        }
+        .rating-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .rating-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.85rem;
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+        }
+        .rating-label input {
+            cursor: pointer;
+        }
+        .rating-label.active-0 { background: #fee2e2; border-color: #f87171; color: #991b1b; }
+        .rating-label.active-1 { background: #fef3c7; border-color: #fbbf24; color: #92400e; }
+        .rating-label.active-2 { background: #e0e7ff; border-color: #818cf8; color: #3730a3; }
+        .rating-label.active-3 { background: #d1fae5; border-color: #34d399; color: #065f46; }
+
+        .remarks-box {
+            margin-top: 15px;
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+        .summary-box {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 25px;
+            text-align: center;
+        }
+        .summary-box h3 {
+            color: var(--primary-dark);
+            margin-bottom: 10px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #93c5fd;
+        }
+        .stat-card .value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+        .submit-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        @media(max-width: 600px) {
+            body { padding: 10px; }
+            header { padding: 15px; }
+            .controls-bar { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>ITI Fitter 2nd Year (Points 12 to 22)</h1>
+        <p>Trainee Self-Grading System & Competency Assessment Tracker</p>
+    </header>
+
+    <!-- Student Details Card -->
+    <div class="card">
+        <h3>Trainee Identification</h3>
+        <div class="student-grid">
+            <div class="form-group">
+                <label for="studentName">Full Name</label>
+                <input type="text" id="studentName" placeholder="Enter trainee name" oninput="saveData()">
+            </div>
+            <div class="form-group">
+                <label for="rollNo">Roll / Reg. No.</label>
+                <input type="text" id="rollNo" placeholder="Enter roll number" oninput="saveData()">
+            </div>
+            <div class="form-group">
+                <label for="tradeYear">Trade & Year</label>
+                <input type="text" id="tradeYear" value="Fitter - 2nd Year (Points 12-22)" readonly style="background: #f9fafb;">
+            </div>
+            <div class="form-group">
+                <label for="adminPhone">Admin WhatsApp No.</label>
+                <input type="text" id="adminPhone" value="919876543210" placeholder="e.g., 919876543210" oninput="saveData()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+        <div>
+            <button class="btn btn-outline" onclick="toggleAllSections(true)">Select All Sections</button>
+            <button class="btn btn-outline" onclick="toggleAllSections(false)">Deselect All</button>
+        </div>
+        <div>
+            <button class="btn btn-outline" onclick="resetScores()">Reset Scores</button>
+        </div>
+    </div>
+
+    <!-- Sections Container -->
+    <div id="sectionsContainer"></div>
+
+    <!-- Summary Box -->
+    <div class="summary-box">
+        <h3>Assessment Summary (Selected Sections)</h3>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="value" id="statSelectedCount">0 / 11</div>
+                <div class="label">Sections Selected</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statRatedCount">0</div>
+                <div class="label">Criteria Rated</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statScorePct">0%</div>
+                <div class="label">Mastery Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="value" id="statLevel">Not Started</div>
+                <div class="label">Competency Level</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Section -->
+    <div class="submit-section">
+        <button class="btn btn-success" style="font-size: 1.1rem; padding: 14px 28px;" onclick="sendWhatsAppReport()">
+            📲 Submit & WhatsApp Outcome to Admin
+        </button>
+    </div>
+</div>
+
+<script>
+    // Fitter 2nd Year Curriculum Data (Points 12 to 22 based on uploaded PDF)[cite: 24, 25, 26, 27, 28]
+    const curriculumData = [
+        {
+            id: 12,
+            title: "Point 12: Mating Surfaces & Dovetail/Radius Fitting",
+            criteria: [
+                "Ascertain and select tools and materials for the job and make this available in a timely manner.",
+                "Plan work in compliance with standard safety norms and collect necessary information[cite: 24].",
+                "Set up workplace/ assembly location with due consideration to operational stipulation[cite: 24].",
+                "Demonstrate possible solutions and agree tasks within the team[cite: 24].",
+                "Produce different components with appropriate accuracy for Dovetail, Radius, and Combined fitting[cite: 24].",
+                "Perform scraping and lapping of components to obtain required surface finish of different mating surfaces[cite: 24].",
+                "Comply with safety rules when performing the above operations[cite: 24].",
+                "Check tolerance and accuracy of components as defined with appropriate instruments observing standard procedure[cite: 24, 25].",
+                "Assemble different components using different fastening components (dowel pins, screws, bolts, keys, cotters) and hand/power tools, checking functionality[cite: 25]."
+            ]
+        },
+        {
+            id: 13,
+            title: "Point 13: Make Different Gauges (Snap/Gap Gauge)",
+            criteria: [
+                "Ascertain and select tools and materials for the job and make this available in a timely manner[cite: 25].",
+                "Plan work in compliance with standard safety norms[cite: 25].",
+                "Produce gauge by observing appropriate method and as per specification of drawing (Accuracy ±0.02mm)[cite: 25].",
+                "Perform Lapping of gauge to obtain required finish as per drawing[cite: 25].",
+                "Check tolerance and specified accuracy of gauge with appropriate measuring instruments as per drawing[cite: 25].",
+                "Avoid waste, store unused materials appropriately and prepare for disposal[cite: 25]."
+            ]
+        },
+        {
+            id: 14,
+            title: "Point 14: Pipe Joints, Valves & Fittings",
+            criteria: [
+                "Ascertain and select tools and materials for the job (cutting, threading, flaring, bending, joining)[cite: 25].",
+                "Plan to dismantle and assemble valves and pipe fittings[cite: 25].",
+                "Dismantle valves and fittings in pipes applying range of skills and check for defect as per standard procedure[cite: 25].",
+                "Demonstrate possible solutions in case of defect and agree tasks within the team for repair or replacement[cite: 25].",
+                "Assemble valves and various pipe fittings using range of skills and observing standard procedure[cite: 25].",
+                "Test for leakage and appropriate functioning of valves[cite: 25].",
+                "Avoid waste and dispose unsalvageable materials as per standard procedures[cite: 25]."
+            ]
+        },
+        {
+            id: 15,
+            title: "Point 15: Drill Jigs & Component Production",
+            criteria: [
+                "Set up workplace/ assembly location with due consideration to operational stipulation[cite: 25].",
+                "Ascertain and select tools and materials for making drill jigs[cite: 25, 26].",
+                "Collect information related to standard procedure, methods and tools to make drill jigs[cite: 25, 26].",
+                "Mark the components as per drawing[cite: 26].",
+                "Make drill jigs by turning, drilling, reaming, filing, taping, etc.[cite: 26].",
+                "Test the functionality of jig[cite: 26].",
+                "Select suitable jigs for drilling considering desired result and produce component observing standard procedure[cite: 26].",
+                "Comply with safety rules when performing the above operations[cite: 26]."
+            ]
+        },
+        {
+            id: 16,
+            title: "Point 16: Power Transmission Components Repair",
+            criteria: [
+                "Select and ascertain tools and materials for damaged mechanical components (Pulley, Gear, Keys, Jibs, Shafts)[cite: 26].",
+                "Plan to dismantle, repair and assemble mechanical components used for power transmission as per drawing[cite: 26].",
+                "Perform dismantling and appropriate repairing of mechanical components with accuracy applying range of skills[cite: 26].",
+                "Check the accuracy of the repaired components with appropriate gauge & instruments[cite: 26].",
+                "Assemble the repaired mechanical components observing standard procedure[cite: 26].",
+                "Comply with safety rules when performing operations[cite: 26].",
+                "Check different parameters of power transmission e.g. R.P.M, slackness of belts, matching of gears/clutches, loss of RPM[cite: 26].",
+                "Check for functionality of power transmission system or any assembly as per standard parameters[cite: 26]."
+            ]
+        },
+        {
+            id: 17,
+            title: "Point 17: Pneumatics & Hydraulics Components",
+            criteria: [
+                "Select and ascertain tools for the job and make this available in a timely manner[cite: 26].",
+                "Identify different pneumatics and hydraulics components (Compressor, Pressure Gauge, Filter Regulator Lubricator, Valves, Actuators)[cite: 26].",
+                "Plan to dismantle and replace pneumatics & hydraulics circuit as per drawing[cite: 26].",
+                "Perform dismantling and replacing of different components with accuracy applying standard operating procedure[cite: 26].",
+                "Assemble different components and check functionality[cite: 26]."
+            ]
+        },
+        {
+            id: 18,
+            title: "Point 18: Pneumatics & Hydraulics Circuits Construction",
+            criteria: [
+                "Select and ascertain tools for the job and make this available in a timely manner[cite: 26, 27].",
+                "Plan to construct pneumatics & hydraulics circuit as per drawing and collect necessary information[cite: 27].",
+                "Demonstrate possible solutions and agree tasks within the team for constructing circuit[cite: 27].",
+                "Construct circuit of pneumatics and hydraulics observing standard procedure[cite: 27].",
+                "Comply with safety rules when performing operations[cite: 27].",
+                "Check different parameters and functionality of the system[cite: 27]."
+            ]
+        },
+        {
+            id: 19,
+            title: "Point 19: Preventive Maintenance of Simple Machines",
+            criteria: [
+                "Ascertain preventive maintenance/repair procedure as per manual of machine (Drill, Power Saw, Lathe)[cite: 27].",
+                "Interpret construction, alignment and assembly of different parts of machine[cite: 27].",
+                "Plan to carry out preventive maintenance/repair task with appropriate accuracy[cite: 27].",
+                "Perform preventive maintenance/dismantle, repair parts and assemble sub-assemblies of simple machine[cite: 27].",
+                "Put the machine in operation complying standard operating procedure and check for proper functioning[cite: 27].",
+                "Dispose unsalvageable materials as per standard procedures[cite: 27]."
+            ]
+        },
+        {
+            id: 20,
+            title: "Point 20: Machine Tool Erection & Accuracy Testing",
+            criteria: [
+                "Ascertain erection procedure as per manual of simple machine (Drill, Power Saw, Lathe)[cite: 27].",
+                "Interpret construction, alignment and assembly of different parts of machine[cite: 27].",
+                "Set up workplace/ assembly location with due consideration to operational stipulation[cite: 27].",
+                "Plan and erect simple machine as per layout plan and standard procedure[cite: 27, 28].",
+                "Put the machine in operation complying standard operating procedure[cite: 28].",
+                "Check alignment of erected machine and other parameters as per manual after erection[cite: 28].",
+                "Dispose unsalvageable materials as per standard procedures[cite: 28]."
+            ]
+        },
+        {
+            id: 21,
+            title: "Point 21: Engineering Drawing (2nd Year)",
+            criteria: [
+                "Read & interpret the information on drawings and apply in executing practical work[cite: 28].",
+                "Read & analyze the specification to ascertain material requirement, tools and assembly/maintenance parameters[cite: 28].",
+                "Encounter drawings with missing/unspecified key information and make own calculations to fill in missing dimensions/parameters[cite: 28]."
+            ]
+        },
+        {
+            id: 22,
+            title: "Point 22: Workshop Calculation & Science (2nd Year)",
+            criteria: [
+                "Solve different mathematical problems relevant to second year fitter trade[cite: 28].",
+                "Explain concept of basic science related to the field of study[cite: 28]."
+            ]
+        }
+    ];
+
+    const STORAGE_KEY = "iti_fitter_2nd_yr_pts12_22_v1";
+
+    function renderApp() {
+        const container = document.getElementById("sectionsContainer");
+        let html = "";
+
+        curriculumData.forEach((sec, idx) => {
+            html += `
+                <div class="section-card" id="card-${sec.id}">
+                    <div class="section-header">
+                        <div class="section-title-wrapper">
+                            <input type="checkbox" id="chk-${sec.id}" checked onchange="toggleSection(${sec.id})">
+                            <span class="section-title">${sec.title}</span>
+                        </div>
+                    </div>
+                    <div class="section-body" id="body-${sec.id}">
+            `;
+
+            sec.criteria.forEach((crit, cIdx) => {
+                html += `
+                    <div class="criteria-item">
+                        <div class="criteria-text"><b>${cIdx + 1}.</b> ${crit}</div>
+                        <div class="rating-group" id="rating-${sec.id}-${cIdx}">
+                            <label class="rating-label" onclick="setRating(${sec.id}, ${cIdx}, 0)">
+                                <input type="radio" name="crit-${sec.id}-${cIdx}" value="0"> 0: Not Started
+                            </label>
+                            <label class="rating-label" onclick="setRating(${sec.id}, ${cIdx}, 1)">
+                                <input type="radio" name="crit-${sec.id}-${cIdx}" value="1"> 1: Beginner
+                            </label>
+                            <label class="rating-label" onclick="setRating(${sec.id}, ${cIdx}, 2)">
+                                <input type="radio" name="crit-${sec.id}-${cIdx}" value="2"> 2: Developing
+                            </label>
+                            <label class="rating-label" onclick="setRating(${sec.id}, ${cIdx}, 3)">
+                                <input type="radio" name="crit-${sec.id}-${cIdx}" value="3"> 3: Proficient
+                            </label>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `
+                        <div style="margin-top: 15px;">
+                            <label style="font-size: 0.85rem; font-weight: 600; color: #4b5563;">Practical Remarks / Job Notes (Optional):</label>
+                            <textarea class="remarks-box" id="remarks-${sec.id}" placeholder="Note down specific projects, components made, or supervisor remarks..." oninput="saveData()"></textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+        loadData();
+    }
+
+    function toggleSection(secId) {
+        const chk = document.getElementById(`chk-${secId}`);
+        const card = document.getElementById(`card-${secId}`);
+        if (chk.checked) {
+            card.classList.add("selected");
+        } else {
+            card.classList.remove("selected");
+        }
+        saveData();
+        updateSummary();
+    }
+
+    function toggleAllSections(selectState) {
+        curriculumData.forEach(sec => {
+            const chk = document.getElementById(`chk-${sec.id}`);
+            const card = document.getElementById(`card-${sec.id}`);
+            chk.checked = selectState;
+            if (selectState) {
+                card.classList.add("selected");
+            } else {
+                card.classList.remove("selected");
+            }
+        });
+        saveData();
+        updateSummary();
+    }
+
+    function setRating(secId, cIdx, val) {
+        const radios = document.querySelectorAll(`input[name="crit-${secId}-${cIdx}"]`);
+        radios.forEach(r => {
+            if (parseInt(r.value) === val) {
+                r.checked = true;
+            }
+        });
+
+        // Update styling
+        const group = document.getElementById(`rating-${secId}-${cIdx}`);
+        const labels = group.querySelectorAll(".rating-label");
+        labels.forEach((lbl, lIdx) => {
+            lbl.className = "rating-label";
+            if (lIdx === val) {
+                lbl.classList.add(`active-${val}`);
+            }
+        });
+
+        saveData();
+        updateSummary();
+    }
+
+    function updateSummary() {
+        let selectedSectionsCount = 0;
+        let totalRated = 0;
+        let totalScore = 0;
+        let maxPossibleScore = 0;
+
+        curriculumData.forEach(sec => {
+            const chk = document.getElementById(`chk-${sec.id}`);
+            if (chk.checked) {
+                selectedSectionsCount++;
+                sec.criteria.forEach((crit, cIdx) => {
+                    const radios = document.querySelectorAll(`input[name="crit-${sec.id}-${cIdx}"]`);
+                    let rated = false;
+                    radios.forEach(r => {
+                        if (r.checked) {
+                            rated = true;
+                            totalRated++;
+                            totalScore += parseInt(r.value);
+                        }
+                    });
+                    maxPossibleScore += 3;
+                });
+            }
+        });
+
+        document.getElementById("statSelectedCount").innerText = `${selectedSectionsCount} / 11`;
+        document.getElementById("statRatedCount").innerText = totalRated;
+
+        let pct = maxPossibleScore > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
+        document.getElementById("statScorePct").innerText = `${pct}%`;
+
+        let level = "Not Started";
+        if (pct >= 80) level = "Distinction 🏆";
+        else if (pct >= 65) level = "Proficient 👍";
+        else if (pct >= 40) level = "Developing 📈";
+        else if (pct > 0) level = "Beginner 🛠️";
+
+        document.getElementById("statLevel").innerText = level;
+    }
+
+    function saveData() {
+        const data = {
+            studentName: document.getElementById("studentName").value,
+            rollNo: document.getElementById("rollNo").value,
+            adminPhone: document.getElementById("adminPhone").value,
+            sections: {}
+        };
+
+        curriculumData.forEach(sec => {
+            const chk = document.getElementById(`chk-${sec.id}`);
+            const remarks = document.getElementById(`remarks-${sec.id}`).value;
+            const criteriaRatings = {};
+
+            sec.criteria.forEach((crit, cIdx) => {
+                const radios = document.querySelectorAll(`input[name="crit-${sec.id}-${cIdx}"]`);
+                radios.forEach(r => {
+                    if (r.checked) {
+                        criteriaRatings[cIdx] = parseInt(r.value);
+                    }
+                });
+            });
+
+            data.sections[sec.id] = {
+                selected: chk.checked,
+                remarks: remarks,
+                ratings: criteriaRatings
+            };
+        });
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        updateSummary();
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) {
+            toggleAllSections(true);
+            return;
+        }
+
+        try {
+            const data = JSON.parse(saved);
+            if (data.studentName) document.getElementById("studentName").value = data.studentName;
+            if (data.rollNo) document.getElementById("rollNo").value = data.rollNo;
+            if (data.adminPhone) document.getElementById("adminPhone").value = data.adminPhone;
+
+            if (data.sections) {
+                curriculumData.forEach(sec => {
+                    const secData = data.sections[sec.id];
+                    if (secData) {
+                        const chk = document.getElementById(`chk-${sec.id}`);
+                        const card = document.getElementById(`card-${sec.id}`);
+                        chk.checked = secData.selected;
+                        if (secData.selected) card.classList.add("selected");
+                        else card.classList.remove("selected");
+
+                        if (secData.remarks) {
+                            document.getElementById(`remarks-${sec.id}`).value = secData.remarks;
+                        }
+
+                        if (secData.ratings) {
+                            Object.keys(secData.ratings).forEach(cIdx => {
+                                setRating(sec.id, cIdx, secData.ratings[cIdx]);
+                            });
+                        }
+                    }
+                });
+            }
+        } catch (e) {
+            console.error("Error loading saved data", e);
+            toggleAllSections(true);
+        }
+        updateSummary();
+    }
+
+    function resetScores() {
+        if (confirm("Are you sure you want to reset all ratings and remarks?")) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+    }
+
+    function sendWhatsAppReport() {
+        const name = document.getElementById("studentName").value.trim();
+        const roll = document.getElementById("rollNo").value.trim();
+        const adminPhone = document.getElementById("adminPhone").value.trim();
+
+        if (!name || !roll) {
+            alert("Please enter your Full Name and Roll/Registration Number before submitting.");
+            document.getElementById("studentName").focus();
+            return;
+        }
+
+        let report = `*ITI FITTER 2ND YEAR SELF-GRADING REPORT*\n`;
+        report += `*(Points 12 to 22)*\n\n`;
+        report += `👤 *Name:* ${name}\n`;
+        report += `🆔 *Roll No:* ${roll}\n\n`;
+        report += `--- *SELECTED SECTIONS REPORT* ---\n\n`;
+
+        let selectedCount = 0;
+
+        curriculumData.forEach(sec => {
+            const chk = document.getElementById(`chk-${sec.id}`);
+            if (chk.checked) {
+                selectedCount++;
+                report += `📌 *${sec.title}*\n`;
+                
+                let secScore = 0;
+                let secMax = sec.criteria.length * 3;
+
+                sec.criteria.forEach((crit, cIdx) => {
+                    const radios = document.querySelectorAll(`input[name="crit-${sec.id}-${cIdx}"]`);
+                    let val = 0;
+                    radios.forEach(r => {
+                        if (r.checked) val = parseInt(r.value);
+                    });
+                    secScore += val;
+                    const stars = ["❌ Not Started", "⚠️ Beginner", "📈 Developing", "✅ Proficient"][val];
+                    report += `  • C${cIdx + 1}: ${stars} (${val}/3)\n`;
+                });
+
+                const remarks = document.getElementById(`remarks-${sec.id}`).value.trim();
+                if (remarks) {
+                    report += `  📝 *Remarks:* ${remarks}\n`;
+                }
+                report += `  📊 *Section Score:* ${secScore} / ${secMax}\n\n`;
+            }
+        });
+
+        if (selectedCount === 0) {
+            alert("Please select at least one section to submit.");
+            return;
+        }
+
+        report += `🎯 *Overall Mastery:* ${document.getElementById("statScorePct").innerText} (${document.getElementById("statLevel").innerText})\n`;
+        report += `_Submitted via ITI Fitter Self-Grading Portal_`;
+
+        const encoded = encodeURIComponent(report);
+        const url = `https://wa.me/${adminPhone}?text=${encoded}`;
+        window.open(url, "_blank");
+    }
+
+    window.onload = renderApp;
+</script>
+
+</body>
+</html>

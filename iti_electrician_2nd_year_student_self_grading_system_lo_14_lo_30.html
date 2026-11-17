@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITI Electrician 2nd Year — Student Self-Grading System (LO 14 – LO 30)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .rating-btn.active-0 { background-color: #64748b; color: white; border-color: #64748b; }
+        .rating-btn.active-1 { background-color: #f59e0b; color: white; border-color: #f59e0b; }
+        .rating-btn.active-2 { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .rating-btn.active-3 { background-color: #10b981; color: white; border-color: #10b981; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- Top Header -->
+    <header class="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white shadow-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="bg-amber-500 text-slate-900 p-3 rounded-xl shadow-md font-bold text-xl flex items-center justify-center">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold tracking-tight">ITI Electrician - 2nd Year (LO 14 – LO 30)</h1>
+                    <p class="text-xs sm:text-sm text-indigo-200">Section-Wise Learning Outcome Self-Grading Portal</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                <button onclick="openResetModal()" class="px-3.5 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-medium rounded-lg border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+                <button onclick="openWhatsAppModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-semibold rounded-lg transition flex items-center gap-2 shadow-lg hover:shadow-emerald-600/30">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Submit Selected
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        <!-- Left 3 Columns: Assessment Form -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- Student Details & Admin Config Card -->
+            <section class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">1</span>
+                        Student & Admin Details
+                    </h2>
+                    <span class="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-full">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Auto-saved locally
+                    </span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Student Full Name <span class="text-red-500">*</span></label>
+                        <input type="text" id="studentName" oninput="saveState()" placeholder="e.g. Rahul Sharma" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50/50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Roll No / Reg ID</label>
+                        <input type="text" id="studentRoll" oninput="saveState()" placeholder="e.g. ITI/EL/2026/045" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50/50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Trade & Batch</label>
+                        <input type="text" id="studentBatch" oninput="saveState()" value="Electrician - 2nd Year (2026-27)" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50/50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Assessment Date</label>
+                        <input type="date" id="assessmentDate" oninput="saveState()" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm bg-slate-50/50 transition">
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 text-xs text-slate-600">
+                        <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
+                        <span><strong>Admin WhatsApp No:</strong> Include country code without '+' (e.g., 919876543210)</span>
+                    </div>
+                    <div class="w-full sm:w-64">
+                        <input type="tel" id="adminPhone" oninput="saveState()" value="91" placeholder="919876543210" class="w-full px-3.5 py-2 rounded-xl border border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-emerald-50/30 font-medium text-slate-800">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Grading Scale Legend Banner -->
+            <section class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 sm:p-5">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-indigo-900 mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-indigo-600"></i> Competency Rating Rubric (0 to 3 Scale)
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center shrink-0">0</span>
+                        <div><strong class="text-slate-700 block">Not Started (0)</strong> Needs practice / unattempted</div>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-xl border border-amber-100 shadow-xs flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center shrink-0">1</span>
+                        <div><strong class="text-amber-700 block">Beginner (1)</strong> Can perform with guidance</div>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-xl border border-blue-100 shadow-xs flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-700 font-bold flex items-center justify-center shrink-0">2</span>
+                        <div><strong class="text-blue-700 block">Developing (2)</strong> Independent & accurate</div>
+                    </div>
+                    <div class="bg-white p-2.5 rounded-xl border border-emerald-100 shadow-xs flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center shrink-0">3</span>
+                        <div><strong class="text-emerald-700 block">Proficient (3)</strong> Mastered & can teach others</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section Selection Controls Bar -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold">2</span>
+                    <div>
+                        <h2 class="text-sm font-bold text-slate-900">Select Learning Outcome Sections</h2>
+                        <p class="text-xs text-slate-500">Check the sections you want to self-grade and submit to Admin</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="toggleAllSections(true)" class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-lg transition">
+                        <i class="fa-solid fa-check-double mr-1"></i> Select All (17)
+                    </button>
+                    <button type="button" onclick="toggleAllSections(false)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition">
+                        <i class="fa-regular fa-square mr-1"></i> Deselect All
+                    </button>
+                    <button type="button" onclick="expandCollapseAll(true)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition" title="Expand Selected">
+                        <i class="fa-solid fa-angles-down"></i>
+                    </button>
+                    <button type="button" onclick="expandCollapseAll(false)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-medium rounded-lg transition" title="Collapse All">
+                        <i class="fa-solid fa-angles-up"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Learning Outcomes List Container -->
+            <div id="outcomesContainer" class="space-y-4">
+                <!-- Dynamically populated via script -->
+            </div>
+
+        </div>
+
+        <!-- Right 1 Column: Sticky Summary & Stats Dashboard -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="sticky top-24 bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 space-y-5">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center justify-between">
+                        <span>Selected Sections Summary</span>
+                        <i class="fa-solid fa-chart-pie text-indigo-600"></i>
+                    </h3>
+                    
+                    <!-- Selected Sections Indicator -->
+                    <div class="bg-indigo-50/80 border border-indigo-100 rounded-xl p-3 mb-4 flex items-center justify-between">
+                        <span class="text-xs font-semibold text-indigo-900">Sections Selected</span>
+                        <span class="text-sm font-bold text-indigo-700"><span id="selectedSectionsCount">0</span> / 17</span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="space-y-2 mb-5">
+                        <div class="flex justify-between text-sm font-semibold">
+                            <span class="text-slate-600">Selected Mastery</span>
+                            <span id="percentageText" class="text-indigo-600">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-3.5 overflow-hidden p-0.5 border border-slate-200">
+                            <div id="progressBar" class="bg-indigo-600 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Metrics Grid -->
+                    <div class="grid grid-cols-2 gap-3 mb-5">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-center">
+                            <span class="block text-[11px] font-semibold text-slate-500 uppercase">Selected Score</span>
+                            <span id="obtainedScoreText" class="text-xl font-bold text-slate-900">0</span>
+                            <span class="text-xs text-slate-400"> / <span id="maxScoreText">0</span></span>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-center">
+                            <span class="block text-[11px] font-semibold text-slate-500 uppercase">Points Rated</span>
+                            <span id="assessedCountText" class="text-xl font-bold text-indigo-600">0</span>
+                            <span class="text-xs text-slate-400"> / <span id="totalCriteriaText">0</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Performance Grade Badge -->
+                    <div id="gradeBadgeContainer" class="bg-slate-100 rounded-xl p-3.5 text-center border border-slate-200 transition-all mb-4">
+                        <span class="block text-[11px] font-semibold uppercase text-slate-500 mb-0.5">Readiness Level</span>
+                        <span id="gradeText" class="text-base font-bold text-slate-700">No Sections Selected</span>
+                    </div>
+
+                    <!-- Overall Curriculum Overview Mini-Stat -->
+                    <div class="text-xs text-slate-500 bg-slate-50 rounded-lg p-2.5 border border-slate-100 flex justify-between items-center">
+                        <span>Overall 2nd Yr (LO 14–30):</span>
+                        <span id="overallCurriculumText" class="font-semibold text-slate-700">0 / 267 (0%)</span>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <div class="space-y-2.5">
+                    <button onclick="openWhatsAppModal()" class="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-emerald-600/30 transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-brands fa-whatsapp text-lg"></i> Submit Selected Sections
+                    </button>
+                    <button onclick="window.print()" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-print"></i> Print / Save PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- WhatsApp Submission & Preview Modal -->
+    <div id="whatsappModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-xl"></i> Submit Selected Sections to Admin
+                </h3>
+                <button onclick="closeWhatsAppModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div id="modalValidationBanner" class="hidden bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs font-medium flex items-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span id="modalValidationMsg">Please complete required fields.</span>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">Admin WhatsApp Number (with Country Code)</label>
+                <input type="tel" id="modalAdminPhone" oninput="syncAdminPhone(this.value)" placeholder="919876543210" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium">
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-1.5">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500">WhatsApp Report Preview (Selected Sections Only)</label>
+                    <button type="button" onclick="copyReportText()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                        <i class="fa-regular fa-copy"></i> Copy Text
+                    </button>
+                </div>
+                <textarea id="previewReportTextarea" readonly rows="10" class="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-700 font-mono focus:outline-none resize-none"></textarea>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-2.5 pt-1">
+                <button onclick="closeWhatsAppModal()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">Cancel</button>
+                <button onclick="copyReportText()" class="py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold rounded-xl text-sm transition flex items-center justify-center gap-1.5">
+                    <i class="fa-regular fa-copy"></i> Copy Report
+                </button>
+                <button onclick="sendToWhatsApp()" class="flex-1 py-2.5 px-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl text-sm transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Send via WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Reset Confirmation Modal (No browser confirm()) -->
+    <div id="resetModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900">Reset All Assessment Data?</h3>
+            <p class="text-sm text-slate-600">This will clear all your ratings, remarks, and section selections. Student details will be preserved.</p>
+            <div class="flex gap-3 pt-2">
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition">Cancel</button>
+                <button onclick="confirmReset()" class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl text-sm transition">Yes, Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl z-50 text-sm font-medium transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage">Success message</span>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 border-t border-slate-800 text-center text-xs mt-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <p>ITI Electrician 2nd Year (LO 14 – LO 30) Learning Outcome Self-Grading System &bull; Based on NCVT Curriculum / NOS Standards</p>
+        </div>
+    </footer>
+
+    <!-- Script Data & Logic -->
+    <script>
+        // Exact 17 Learning Outcomes (LO 14 to LO 30) & Assessment Criteria from Electrician Outcome_2nd_Year.pdf
+        const learningOutcomes = [
+            {
+                id: 14,
+                title: "Plan, execute commissioning and evaluate performance of DC machines. (NOS: PSS/N4402)",
+                criteria: [
+                    "Plan work in compliance with standard safety norms related with DC machines.",
+                    "Determine the load performance of a different type of DC generator on load.",
+                    "Connect, start, run and reverse direction of rotation of different types of DC motors.",
+                    "Conduct the load performance tests on different type of DC motor.",
+                    "Control the speed of a DC motor by different method."
+                ]
+            },
+            {
+                id: 15,
+                title: "Execute testing, and maintenance of DC machines and motor starters. (NOS: PSS/N4402)",
+                criteria: [
+                    "Test a DC machine for continuity and insulation resistance.",
+                    "Maintenance, troubleshooting & servicing of DC machines.",
+                    "Test armature by using growler.",
+                    "Maintain, service and troubleshoot the DC motor starter."
+                ]
+            },
+            {
+                id: 16,
+                title: "Plan, execute commissioning and evaluate performance of AC motors. (NOS: PSS/N1709)",
+                criteria: [
+                    "Plan work in compliance with standard safety norms related with AC motors.",
+                    "Draw circuit diagram and connect forward & reverse a 3-phase squirrel cage induction motor.",
+                    "Start, run and reverse an AC 3 phase squirrel cage induction motor by different type of starters.",
+                    "Measure the slip of 3 phase squirrel cage induction motor by tachometer for different output. Draw slip/ load characteristics of the motor.",
+                    "Determine the efficiency of 3 phase squirrel cage induction motor by no load test/ blocked rotor test and brake test.",
+                    "Plot the speed torque (Slip/Torque) characteristics of slip ring induction motor.",
+                    "Demonstrate speed control of 3 phase induction motor.",
+                    "Connect, start and run a 3-phase synchronous motor.",
+                    "Connect start, run, control speed and reverse the DOR of different type of single-phase motors.",
+                    "Install a single-phase AC motor."
+                ]
+            },
+            {
+                id: 17,
+                title: "Execute testing, and maintenance of AC motors and starters. (NOS: PSS/N1709)",
+                criteria: [
+                    "Test continuity and insulation of various AC motors.",
+                    "Maintain, service and troubleshoot of three phase AC motors.",
+                    "Maintain, service and troubleshoot of different types of single-phase AC motors.",
+                    "Maintain, service and troubleshoot the AC motor starter."
+                ]
+            },
+            {
+                id: 18,
+                title: "Plan, execute testing, evaluate performance and carry out maintenance of Alternator / MG set.",
+                criteria: [
+                    "Plan work in compliance with standard safety norms related with Alternator & MG set.",
+                    "Connect start and run an alternator and build up the voltage.",
+                    "Determine the load performance of a 3-phase alternator.",
+                    "Start and load a MG set with 3 phase induction motor coupled to DC shunt generator and build up the voltage.",
+                    "Perform/Explain alignment of MG set.",
+                    "Preventive and breakdown maintenance of alternator / MG set.",
+                    "Explain the effect of excitation current in terms of V-curves of synchronous motor."
+                ]
+            },
+            {
+                id: 19,
+                title: "Execute parallel operation of alternators.",
+                criteria: [
+                    "Demonstrate parallel operation of an alternator Bright lamp method/ Dark lamp method/ Bright and dark lamp method.",
+                    "Parallel operation of an alternator by using synchroscope."
+                ]
+            },
+            {
+                id: 20,
+                title: "Distinguish, organise and perform motor winding. (NOS: PSS/N4402)",
+                criteria: [
+                    "Rewind the field coil /armature winding/ table fan /ceiling fan.",
+                    "Draw winding diagram & rewind a single-phase split type motor (Concentric coil winding).",
+                    "Draw winding diagram & rewind a 3-phase squirrel cage induction motor (single layer distributed winding).",
+                    "Draw winding diagram & rewind a 3-phase induction motor (single layer concentric type half coil connection).",
+                    "Draw winding diagram & rewind a 3-phase squirrel cage induction motor (Double layer distributed type winding)."
+                ]
+            },
+            {
+                id: 21,
+                title: "Assemble simple electronic circuits and test for functioning.",
+                criteria: [
+                    "Perform soldering on components/lug/ board with safety.",
+                    "Identify the passive /active components by visual appearance, code number and test for their condition.",
+                    "Identify the control and functional switches in CRO and measure the D.C. & A.C. voltage, frequency and time period.",
+                    "Construct and test a half & full wave rectifier with and without filter circuits.",
+                    "Construct circuit by using transistor as a switch.",
+                    "Construct and test a UJT as relaxation oscillator & electronic timer.",
+                    "Construct amplifier circuit using Transistor, FET and JFET and test.",
+                    "Construct and test lamp dimmer using TRIAC/DIAC.",
+                    "Test IGBT and use in circuit for suitable operation.",
+                    "Construct and test the universal motor speed controller using SCR with safety.",
+                    "Construct and test logic gate circuits."
+                ]
+            },
+            {
+                id: 22,
+                title: "Assemble accessories and carry out wiring of control cabinets and equipment.",
+                criteria: [
+                    "Draw the layout diagram of 3 phase AC motor control cabinet.",
+                    "Mount the control elements & wiring accessories on the control panel.",
+                    "Carry out wiring in control cabinet for local and remote control of induction motor.",
+                    "Draw & wire up the control panel for forward/ reverse operation of induction motor.",
+                    "Perform wiring for automatic star delta starter.",
+                    "Draw & wire up control panel for sequential motor control for three motors.",
+                    "Draw & wire up the control panel for a given circuit diagram and connect the motor.",
+                    "Test the control panel for all the required logics."
+                ]
+            },
+            {
+                id: 23,
+                title: "Perform speed control of AC and DC motors by using solid state devices.",
+                criteria: [
+                    "Control the speed of DC motor by using DC drive.",
+                    "Speed control of universal motor by using SCR.",
+                    "Control speed and reverse the direction of rotation of different type of three phase induction motors using VVVF control /AC drive."
+                ]
+            },
+            {
+                id: 24,
+                title: "Detect the faults and troubleshoot inverter, stabilizer, battery charger, emergency light and UPS etc. (NOS: PSS/N6002)",
+                criteria: [
+                    "Operation and maintenance of inverter.",
+                    "Troubleshoot and service a voltage stabilizer.",
+                    "Identify the parts, trace the connection and test the DC regulated power supply with safety.",
+                    "Troubleshoot and service a DC regulated power supply.",
+                    "Test battery charger for its operation.",
+                    "Prepare an emergency light.",
+                    "Carryout maintenance of UPS."
+                ]
+            },
+            {
+                id: 25,
+                title: "Plan, assemble and install solar panel.",
+                criteria: [
+                    "Plan work in compliance with solar panel installation norms.",
+                    "Combination of solar cells for given power requirement.",
+                    "Assemble and install solar panel.",
+                    "Check the functionality of solar panel."
+                ]
+            },
+            {
+                id: 26,
+                title: "Erect overhead domestic service line and outline various power plant layout and explain smart distribution grid and its components. (NOS: PSS/N0106)",
+                criteria: [
+                    "Prepare single line diagram of thermal/ hydel/ Solar /Wind power plants.",
+                    "Prepare layout plan and single line diagram of transmission line.",
+                    "Draw an overhead and domestic service line.",
+                    "Explain erection of an overhead service line pole for single phase 240V distribution system.",
+                    "Identify different type of insulator used in HT and LT line.",
+                    "Fasten jumper in insulators.",
+                    "Connect feeder cable with domestic service line.",
+                    "Identify components and equipment of smart distribution grid.",
+                    "Explain Smart Grid Communication infrastructure components."
+                ]
+            },
+            {
+                id: 27,
+                title: "Examine the faults and carry out repairing of circuit breakers. (NOS: PSS/N7001)",
+                criteria: [
+                    "Prepare layout plan and single line diagram of Distribution substation.",
+                    "Illustrate application of relays in control circuits and examine its operation.",
+                    "Identify parts of circuit breaker and check its operation."
+                ]
+            },
+            {
+                id: 28,
+                title: "Install and troubleshoot Electric Vehicle charging stations.",
+                criteria: [
+                    "Explain charger specifications.",
+                    "Demonstrate installation of EV charging Station for Public places/ Home."
+                ]
+            },
+            {
+                id: 29,
+                title: "Read and apply engineering drawing for different application in the field of work.",
+                criteria: [
+                    "Read & interpret the information on drawings and apply in executing practical work.",
+                    "Read & analyze the specification to ascertain the material requirement, tools and assembly/maintenance parameters.",
+                    "Encounter drawings with missing/unspecified key information and make own calculations to fill in missing dimension/parameters to carry out the work."
+                ]
+            },
+            {
+                id: 30,
+                title: "Demonstrate basic mathematical concept and principles to perform practical operations. Understand and explain basic science in the field of study.",
+                criteria: [
+                    "Solve different mathematical problems.",
+                    "Explain concept of basic science related to the field of study."
+                ]
+            }
+        ];
+
+        const STORAGE_KEY = 'iti_elec_2nd_yr_lo14_30_v1';
+
+        // Application State
+        let state = {
+            selectedSections: { 0: true }, // LO 14 selected by default
+            expandedSections: { 0: true },
+            ratings: {}, // { "oIdx-cIdx": 0|1|2|3 }
+            remarks: {}, // { oIdx: "string" }
+            studentName: '',
+            studentRoll: '',
+            studentBatch: 'Electrician - 2nd Year (2026-27)',
+            assessmentDate: new Date().toISOString().split('T')[0],
+            adminPhone: '91'
+        };
+
+        // Load saved state from localStorage
+        function loadState() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                }
+            } catch (e) {
+                console.error("Failed to load local storage:", e);
+            }
+            document.getElementById('studentName').value = state.studentName || '';
+            document.getElementById('studentRoll').value = state.studentRoll || '';
+            document.getElementById('studentBatch').value = state.studentBatch || 'Electrician - 2nd Year (2026-27)';
+            document.getElementById('assessmentDate').value = state.assessmentDate || new Date().toISOString().split('T')[0];
+            document.getElementById('adminPhone').value = state.adminPhone || '91';
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            state.studentName = document.getElementById('studentName').value;
+            state.studentRoll = document.getElementById('studentRoll').value;
+            state.studentBatch = document.getElementById('studentBatch').value;
+            state.assessmentDate = document.getElementById('assessmentDate').value;
+            state.adminPhone = document.getElementById('adminPhone').value;
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch (e) {
+                console.error("Failed to save local storage:", e);
+            }
+        }
+
+        // Toggle section selection checkbox
+        function toggleSectionSelection(oIdx) {
+            const isSelected = !state.selectedSections[oIdx];
+            state.selectedSections[oIdx] = isSelected;
+            // Automatically expand when selected, collapse when deselected
+            state.expandedSections[oIdx] = isSelected;
+            saveState();
+            renderOutcomes();
+        }
+
+        // Toggle expand/collapse accordion
+        function toggleSectionExpand(oIdx) {
+            state.expandedSections[oIdx] = !state.expandedSections[oIdx];
+            saveState();
+            renderOutcomes();
+        }
+
+        // Select All / Deselect All sections
+        function toggleAllSections(selectAll) {
+            learningOutcomes.forEach((_, idx) => {
+                state.selectedSections[idx] = selectAll;
+                state.expandedSections[idx] = selectAll;
+            });
+            saveState();
+            renderOutcomes();
+            showToast(selectAll ? `All ${learningOutcomes.length} sections selected` : "All sections deselected");
+        }
+
+        // Expand or Collapse all sections
+        function expandCollapseAll(expand) {
+            learningOutcomes.forEach((_, idx) => {
+                state.expandedSections[idx] = expand;
+            });
+            saveState();
+            renderOutcomes();
+        }
+
+        // Set rating for a specific assessment criterion point
+        function setRating(oIdx, cIdx, val) {
+            // Auto-select the section if the user grades a point inside it
+            if (!state.selectedSections[oIdx]) {
+                state.selectedSections[oIdx] = true;
+                state.expandedSections[oIdx] = true;
+            }
+            const key = `${oIdx}-${cIdx}`;
+            if (state.ratings[key] === val) {
+                delete state.ratings[key]; // Toggle off if clicked again
+            } else {
+                state.ratings[key] = val;
+            }
+            saveState();
+            renderOutcomes();
+        }
+
+        // Update optional remark for a section
+        function updateRemark(oIdx, value) {
+            state.remarks[oIdx] = value;
+            saveState();
+        }
+
+        // Calculate score for a single section
+        function getSectionStats(oIdx) {
+            const outcome = learningOutcomes[oIdx];
+            let score = 0;
+            let ratedCount = 0;
+            const totalPoints = outcome.criteria.length;
+            const maxScore = totalPoints * 3;
+
+            outcome.criteria.forEach((_, cIdx) => {
+                const key = `${oIdx}-${cIdx}`;
+                if (state.ratings[key] !== undefined) {
+                    score += state.ratings[key];
+                    ratedCount++;
+                }
+            });
+
+            const pct = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+            return { score, maxScore, ratedCount, totalPoints, pct };
+        }
+
+        // Render all 13 Learning Outcome sections
+        function renderOutcomes() {
+            const container = document.getElementById('outcomesContainer');
+            let htmlContent = '';
+
+            learningOutcomes.forEach((outcome, oIdx) => {
+                const isSelected = !!state.selectedSections[oIdx];
+                const isExpanded = !!state.expandedSections[oIdx];
+                const stats = getSectionStats(oIdx);
+
+                const cardBorderClass = isSelected 
+                    ? "bg-white border-indigo-400 ring-2 ring-indigo-500/15 shadow-md" 
+                    : "bg-slate-50/80 border-slate-200/80 opacity-85 hover:opacity-100";
+
+                htmlContent += `
+                    <div class="rounded-2xl border transition-all duration-200 overflow-hidden ${cardBorderClass}">
+                        <!-- Section Header -->
+                        <div class="p-4 sm:p-5 flex items-start sm:items-center justify-between gap-3 ${isSelected ? 'bg-indigo-50/40' : ''}">
+                            <div class="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                                <label class="relative flex items-center cursor-pointer mt-0.5 sm:mt-0 shrink-0" title="Include this section in submission">
+                                    <input type="checkbox" onchange="toggleSectionSelection(${oIdx})" ${isSelected ? 'checked' : ''} class="w-5 h-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </label>
+                                <div onclick="toggleSectionExpand(${oIdx})" class="cursor-pointer flex-1 min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2 mb-1">
+                                        <span class="px-2 py-0.5 rounded-md text-xs font-bold ${isSelected ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                                            LO ${outcome.id}
+                                        </span>
+                                        <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${isSelected ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200/70 text-slate-600'}">
+                                            ${isSelected ? 'Selected for Submission' : 'Not Selected'}
+                                        </span>
+                                        <span class="text-xs font-medium text-slate-500">
+                                            Score: <strong>${stats.score}/${stats.maxScore}</strong> (${stats.pct}%) &bull; Rated: ${stats.ratedCount}/${stats.totalPoints}
+                                        </span>
+                                    </div>
+                                    <h3 class="text-sm sm:text-base font-bold text-slate-900 leading-snug">
+                                        ${outcome.title}
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <button type="button" onclick="toggleSectionExpand(${oIdx})" class="p-2 rounded-lg hover:bg-slate-200/70 text-slate-500 transition shrink-0" aria-label="Toggle section">
+                                <i class="fa-solid ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'}"></i>
+                            </button>
+                        </div>
+
+                        <!-- Collapsible Section Body -->
+                        ${isExpanded ? `
+                        <div class="p-4 sm:p-6 pt-2 border-t border-slate-100 bg-white space-y-4">
+                            <div class="divide-y divide-slate-100">
+                                ${outcome.criteria.map((crit, cIdx) => {
+                                    const key = `${oIdx}-${cIdx}`;
+                                    const hasRating = state.ratings[key] !== undefined;
+                                    const currentVal = state.ratings[key];
+
+                                    return `
+                                        <div class="py-3.5 first:pt-1 last:pb-1 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                                            <div class="text-sm text-slate-700 pr-2 flex items-start gap-2">
+                                                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded shrink-0 mt-0.5">${outcome.id}.${cIdx + 1}</span>
+                                                <span>${crit}</span>
+                                            </div>
+                                            <div class="grid grid-cols-4 sm:flex items-center gap-1.5 shrink-0">
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 0)" class="rating-btn px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition ${hasRating && currentVal === 0 ? 'active-0' : 'bg-white'}">0: Not Started</button>
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 1)" class="rating-btn px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition ${hasRating && currentVal === 1 ? 'active-1' : 'bg-white'}">1: Beginner</button>
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 2)" class="rating-btn px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition ${hasRating && currentVal === 2 ? 'active-2' : 'bg-white'}">2: Developing</button>
+                                                <button type="button" onclick="setRating(${oIdx}, ${cIdx}, 3)" class="rating-btn px-2.5 py-1.5 text-xs font-semibold rounded-lg border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-600 hover:border-emerald-200 transition ${hasRating && currentVal === 3 ? 'active-3' : 'bg-white'}">3: Proficient</button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+
+                            <!-- Optional Section Remarks -->
+                            <div class="pt-3 border-t border-slate-100">
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Optional Remarks / Practical Notes for LO ${outcome.id}:</label>
+                                <input type="text" value="${(state.remarks[oIdx] || '').replace(/"/g, '&quot;')}" oninput="updateRemark(${oIdx}, this.value)" placeholder="e.g. Completed practical job in workshop, need more practice on calibration..." class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs bg-slate-50/70">
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+            updateDashboard();
+        }
+
+        // Update Sidebar Summary Dashboard (Selected Sections + Overall Curriculum)
+        function updateDashboard() {
+            let selectedCount = 0;
+            let selObtained = 0;
+            let selMaxScore = 0;
+            let selRatedPoints = 0;
+            let selTotalPoints = 0;
+
+            let allObtained = 0;
+            let allMaxScore = 0;
+
+            learningOutcomes.forEach((outcome, oIdx) => {
+                const stats = getSectionStats(oIdx);
+                allObtained += stats.score;
+                allMaxScore += stats.maxScore;
+
+                if (state.selectedSections[oIdx]) {
+                    selectedCount++;
+                    selObtained += stats.score;
+                    selMaxScore += stats.maxScore;
+                    selRatedPoints += stats.ratedCount;
+                    selTotalPoints += stats.totalPoints;
+                }
+            });
+
+            const selPct = selMaxScore > 0 ? Math.round((selObtained / selMaxScore) * 100) : 0;
+            const allPct = allMaxScore > 0 ? Math.round((allObtained / allMaxScore) * 100) : 0;
+
+            document.getElementById('selectedSectionsCount').innerText = selectedCount;
+            document.getElementById('obtainedScoreText').innerText = selObtained;
+            document.getElementById('maxScoreText').innerText = selMaxScore;
+            document.getElementById('assessedCountText').innerText = selRatedPoints;
+            document.getElementById('totalCriteriaText').innerText = selTotalPoints;
+            document.getElementById('percentageText').innerText = selPct + '%';
+            document.getElementById('progressBar').style.width = selPct + '%';
+            document.getElementById('overallCurriculumText').innerText = `${allObtained} / ${allMaxScore} (${allPct}%)`;
+
+            // Readiness Level Badge
+            const badge = document.getElementById('gradeBadgeContainer');
+            const gradeText = document.getElementById('gradeText');
+
+            if (selectedCount === 0) {
+                badge.className = "bg-slate-100 rounded-xl p-3.5 text-center border border-slate-200 transition-all mb-4";
+                gradeText.className = "text-base font-bold text-slate-600";
+                gradeText.innerText = "No Sections Selected";
+            } else if (selRatedPoints === 0) {
+                badge.className = "bg-slate-100 rounded-xl p-3.5 text-center border border-slate-200 transition-all mb-4";
+                gradeText.className = "text-base font-bold text-slate-700";
+                gradeText.innerText = "Awaiting Ratings";
+            } else if (selPct >= 85) {
+                badge.className = "bg-emerald-50 rounded-xl p-3.5 text-center border border-emerald-200 transition-all mb-4";
+                gradeText.className = "text-base font-bold text-emerald-700";
+                gradeText.innerText = "Proficient / Exam Ready (A+)";
+            } else if (selPct >= 65) {
+                badge.className = "bg-blue-50 rounded-xl p-3.5 text-center border border-blue-200 transition-all mb-4";
+                gradeText.className = "text-base font-bold text-blue-700";
+                gradeText.innerText = "Developing / Independent (A)";
+            } else if (selPct >= 40) {
+                badge.className = "bg-amber-50 rounded-xl p-3.5 text-center border border-amber-200 transition-all mb-4";
+                gradeText.className = "text-base font-bold text-amber-700";
+                gradeText.innerText = "Beginner / Guided Practice (B)";
+            } else {
+                badge.className = "bg-red-50 rounded-xl p-3.5 text-center border border-red-200 transition-all mb-4";
+                gradeText.className = "text-base font-bold text-red-700";
+                gradeText.innerText = "Needs Workshop Practice (C)";
+            }
+        }
+
+        // Build formatted WhatsApp message for SELECTED sections only
+        function generateWhatsAppReport() {
+            const name = document.getElementById('studentName').value.trim() || "Not Provided";
+            const roll = document.getElementById('studentRoll').value.trim() || "N/A";
+            const batch = document.getElementById('studentBatch').value.trim() || "Electrician - 2nd Year";
+            const date = document.getElementById('assessmentDate').value || new Date().toISOString().split('T')[0];
+
+            const ratingLabels = {
+                0: "0 (Not Started)",
+                1: "1 (Beginner)",
+                2: "2 (Developing)",
+                3: "3 (Proficient)"
+            };
+
+            let selObtained = 0;
+            let selMaxScore = 0;
+            let selRatedPoints = 0;
+            let selTotalPoints = 0;
+            let selectedSectionIndices = [];
+
+            learningOutcomes.forEach((_, oIdx) => {
+                if (state.selectedSections[oIdx]) {
+                    selectedSectionIndices.push(oIdx);
+                    const stats = getSectionStats(oIdx);
+                    selObtained += stats.score;
+                    selMaxScore += stats.maxScore;
+                    selRatedPoints += stats.ratedCount;
+                    selTotalPoints += stats.totalPoints;
+                }
+            });
+
+            const selPct = selMaxScore > 0 ? Math.round((selObtained / selMaxScore) * 100) : 0;
+
+            let msg = `⚡ *ITI ELECTRICIAN (2ND YR: LO 14–30) - SELF-GRADING REPORT* ⚡\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `👤 *Student:* ${name}\n`;
+            msg += `🆔 *Roll/Reg ID:* ${roll}\n`;
+            msg += `📚 *Trade/Batch:* ${batch}\n`;
+            msg += `📅 *Date:* ${date}\n`;
+            msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+            msg += `📊 *SELECTED SECTIONS SUMMARY*\n`;
+            msg += `• *Sections Submitted:* ${selectedSectionIndices.length} of ${learningOutcomes.length}\n`;
+            msg += `• *Total Score:* ${selObtained} / ${selMaxScore} (*${selPct}%*)\n`;
+            msg += `• *Points Rated:* ${selRatedPoints} / ${selTotalPoints}\n\n`;
+
+            selectedSectionIndices.forEach((oIdx) => {
+                const outcome = learningOutcomes[oIdx];
+                const stats = getSectionStats(oIdx);
+                msg += `📌 *LO ${outcome.id}:* ${outcome.title}\n`;
+                msg += `   _Section Score: ${stats.score}/${stats.maxScore} (${stats.pct}%)_\n`;
+
+                outcome.criteria.forEach((crit, cIdx) => {
+                    const key = `${oIdx}-${cIdx}`;
+                    const val = state.ratings[key];
+                    const statusText = val !== undefined ? ratingLabels[val] : "Unrated";
+                    const cleanCrit = crit.length > 75 ? crit.substring(0, 72) + "..." : crit;
+                    msg += `   • ${outcome.id}.${cIdx + 1} ${cleanCrit} ➔ *[${statusText}]*\n`;
+                });
+
+                if (state.remarks[oIdx] && state.remarks[oIdx].trim() !== '') {
+                    msg += `   💬 _Remark:_ ${state.remarks[oIdx].trim()}\n`;
+                }
+                msg += `\n`;
+            });
+
+            msg += `_Rubric: 0=Not Started, 1=Beginner, 2=Developing, 3=Proficient_`;
+            return msg;
+        }
+
+        function openWhatsAppModal() {
+            const selectedCount = Object.values(state.selectedSections).filter(Boolean).length;
+            const name = document.getElementById('studentName').value.trim();
+
+            document.getElementById('modalAdminPhone').value = document.getElementById('adminPhone').value.trim();
+            document.getElementById('previewReportTextarea').value = generateWhatsAppReport();
+
+            const banner = document.getElementById('modalValidationBanner');
+            const bannerMsg = document.getElementById('modalValidationMsg');
+
+            if (selectedCount === 0) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = "Please select at least one Learning Outcome section before submitting.";
+            } else if (!name) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = "Please enter Student Full Name before sending.";
+            } else {
+                banner.classList.add('hidden');
+            }
+
+            document.getElementById('whatsappModal').classList.remove('hidden');
+        }
+
+        function closeWhatsAppModal() {
+            document.getElementById('whatsappModal').classList.add('hidden');
+        }
+
+        function syncAdminPhone(val) {
+            document.getElementById('adminPhone').value = val;
+            saveState();
+        }
+
+        function copyReportText() {
+            const textarea = document.getElementById('previewReportTextarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast("Report copied to clipboard!");
+            } catch (err) {
+                showToast("Unable to copy text.");
+            }
+        }
+
+        function sendToWhatsApp() {
+            const selectedCount = Object.values(state.selectedSections).filter(Boolean).length;
+            const name = document.getElementById('studentName').value.trim();
+            const rawPhone = document.getElementById('modalAdminPhone').value.trim();
+            const cleanPhone = rawPhone.replace(/[^0-9]/g, '');
+
+            const banner = document.getElementById('modalValidationBanner');
+            const bannerMsg = document.getElementById('modalValidationMsg');
+
+            if (selectedCount === 0) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = "Please select at least one Learning Outcome section first.";
+                return;
+            }
+            if (!name) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = "Student Full Name is required.";
+                return;
+            }
+            if (!cleanPhone || cleanPhone.length < 10) {
+                banner.classList.remove('hidden');
+                bannerMsg.innerText = "Enter a valid Admin WhatsApp number with country code (e.g., 919876543210).";
+                return;
+            }
+
+            banner.classList.add('hidden');
+            const reportText = generateWhatsAppReport();
+            const encodedMessage = encodeURIComponent(reportText);
+            const whatsappURL = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+
+            window.open(whatsappURL, '_blank');
+            closeWhatsAppModal();
+            showToast("Opening WhatsApp with selected sections report...");
+        }
+
+        // Custom Reset Modal Handlers
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function confirmReset() {
+            state.ratings = {};
+            state.remarks = {};
+            state.selectedSections = { 0: true };
+            state.expandedSections = { 0: true };
+            saveState();
+            renderOutcomes();
+            closeResetModal();
+            showToast("Assessment ratings & selections cleared");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Initialize on window load
+        window.onload = function() {
+            loadState();
+            renderOutcomes();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+
+
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ITI Fitter/Electrician — Admin Token Generator & Security Portal</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-slate-950">
+
+
+<!-- Top Header Branding -->
+<header class="bg-slate-900 border-b border-slate-800 py-4 px-4 sm:px-8 shadow-md">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-md shadow-amber-500/20">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1 class="text-sm sm:text-base font-extrabold tracking-tight text-white">
+                    ITI Assessment Security Portal
+                </h1>
+                <p class="text-xs text-slate-400">CTS 3.0 NSQF Level 4 &bull; Admin Token &amp; Key Gateway</p>
+            </div>
+        </div>
+        <div class="text-xs font-semibold px-3 py-1 rounded-full bg-slate-800 text-amber-400 border border-slate-700">
+            Secure Access Gate
+        </div>
+    </div>
+</header>
+
+
+<!-- Main Workspace Container -->
+<main class="max-w-4xl mx-auto px-4 py-8 w-full flex-grow flex items-center justify-center">
+    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+        <!-- Card 1: Admin Token Generator -->
+        <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl flex flex-col justify-between space-y-6">
+            <div>
+                <div class="flex items-center gap-2.5 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-key"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-base font-extrabold text-white">Admin Token Generator</h2>
+                        <p class="text-xs text-slate-400">Generate a unique session key for students</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                    As an instructor or admin, generate a secure token key. Share this key with trainees so they can unlock and launch the grading system files.
+                </p>
+
+
+                <!-- Target File Selector -->
+                <div class="space-y-2 mb-4">
+                    <label for="targetFileSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                        Select Target Assessment File
+                    </label>
+                    <select id="targetFileSelect" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                        <option value="iti_fitter_student_self_grading_system_NOV_2026.html">ITI Fitter 1st Year (Points 1–11)</option>
+                        <option value="iti_fitter_student_self_grading_system_NOV_2026_2ndYR.html">ITI Fitter 2nd Year (Points 12–22)</option>
+                        <option value="iti_electrician_1st_year_self_grading_system (1).html">ITI Electrician 1st Year</option>
+                        <option value="iti_electrician_2nd_year_student_self_grading_system_lo_14_lo_30.html">ITI Electrician 2nd Year (LO 14–30)</option>
+                        <option value="student_class_feedback_tracker.html">Student Class Feedback Tracker</option>
+                    </select>
+                </div>
+
+
+                <!-- Generated Token Display -->
+                <div class="bg-slate-950 rounded-xl p-3.5 border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-400 font-semibold">Generated Key:</span>
+                        <span id="genStatus" class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded text-[10px]">Ready</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="adminTokenOutput" readonly class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 font-mono text-center text-sm font-bold text-amber-300 tracking-wider focus:outline-none" placeholder="Click generate...">
+                        <button type="button" onclick="copyAdminToken()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-lg border border-slate-700 text-xs font-bold transition flex items-center gap-1 shrink-0">
+                            <i class="fa-regular fa-copy"></i> Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            <button type="button" onclick="generateNewAdminToken()" class="w-full py-3 px-4 bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold rounded-xl transition shadow-lg shadow-amber-500/20 text-xs sm:text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Generate New Token Key
+            </button>
+        </div>
+
+
+        <!-- Card 2: Student / User Key Validation & Launch -->
+        <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl flex flex-col justify-between space-y-6">
+            <div>
+                <div class="flex items-center gap-2.5 mb-3">
+                    <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-sm">
+                        <i class="fa-solid fa-lock-open"></i>
+                    </span>
+                    <div>
+                        <h2 class="text-base font-extrabold text-white">Validate &amp; Launch</h2>
+                        <p class="text-xs text-slate-400">Enter token key to open the assessment file</p>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-300 leading-relaxed mb-4">
+                    Paste or type the active token key provided by your instructor or admin below to unlock and launch the selected assessment tool.
+                </p>
+
+
+                <!-- Key Input Form -->
+                <div class="space-y-3">
+                    <div>
+                        <label for="validationInputKey" class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                            Enter Session Token Key <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="text" id="validationInputKey" placeholder="e.g. ITI-8F3A-9C21" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-3 font-mono text-sm text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 uppercase tracking-widest">
+                    </div>
+
+
+                    <div id="errorBanner" class="hidden bg-rose-950/80 border border-rose-500/50 text-rose-300 px-3.5 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation shrink-0"></i>
+                        <span id="errorMsg">Invalid key. Please generate or enter the correct active token.</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <button type="button" onclick="validateAndLaunchSystem()" class="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold rounded-xl transition shadow-lg shadow-blue-500/20 text-xs sm:text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-arrow-right-to-bracket text-base"></i> Validate &amp; Open File
+            </button>
+        </div>
+
+
+    </div>
+</main>
+
+
+<!-- Toast Notification -->
+<div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white px-4 py-3 rounded-xl shadow-2xl border border-slate-700 z-50 text-xs font-semibold transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2.5">
+    <i class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMessage">Action completed</span>
+</div>
+
+
+<!-- Footer -->
+<footer class="bg-slate-900 border-t border-slate-800 py-4 text-center text-xs text-slate-500">
+    <p>ITI Fitter &amp; Electrician Self-Grading System &bull; Secure Token Validation Portal</p>
+</footer>
+
+
+<!-- Script -->
+<script>
+    let activeAdminToken = "";
+
+
+    function generateNewAdminToken() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let p1 = "", p2 = "", p3 = "";
+        for (let i = 0; i < 3; i++) p1 += chars.charAt(Math.floor(Math.random() * chars.length));
+        for (let i = 0; i < 4; i++) p2 += chars.charAt(Math.floor(Math.random() * chars.length));
+        for (let i = 0; i < 4; i++) p3 += chars.charAt(Math.floor(Math.random() * chars.length));
+        
+        activeAdminToken = `ITI-${p1}-${p2}-${p3}`;
+        document.getElementById('adminTokenOutput').value = activeAdminToken;
+        document.getElementById('genStatus').innerText = "Active";
+        document.getElementById('genStatus').className = "text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded text-[10px]";
+        showToast("New admin token generated successfully!");
+    }
+
+
+    function copyAdminToken() {
+        const output = document.getElementById('adminTokenOutput');
+        if (!output.value) {
+            showToast("Please generate a token first.", "error");
+            return;
+        }
+        output.select();
+        output.setSelectionRange(0, 99999);
+        try {
+            document.execCommand('copy');
+            showToast("Admin token copied to clipboard!");
+        } catch (err) {
+            showToast("Unable to copy token.", "error");
+        }
+    }
+
+
+    function validateAndLaunchSystem() {
+        const userKey = document.getElementById('validationInputKey').value.trim().toUpperCase();
+        const targetSelect = document.getElementById('targetFileSelect');
+        const selectedFile = targetSelect.value;
+        const errorBanner = document.getElementById('errorBanner');
+        const errorMsg = document.getElementById('errorMsg');
+
+
+        if (!userKey) {
+            errorBanner.classList.remove('hidden');
+            errorMsg.innerText = "Please enter a token key.";
+            return;
+        }
+
+
+        if (!activeAdminToken) {
+            errorBanner.classList.remove('hidden');
+            errorMsg.innerText = "No active admin token has been generated yet.";
+            return;
+        }
+
+
+        if (userKey === activeAdminToken) {
+            errorBanner.classList.add('hidden');
+            showToast("Validation successful! Launching file...");
+            
+            // Invalidate token after single use
+            activeAdminToken = "USED-" + Math.random();
+            document.getElementById('genStatus').innerText = "Used / Expired";
+            document.getElementById('genStatus').className = "text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded text-[10px]";
+
+
+            setTimeout(() => {
+                window.location.href = selectedFile;
+            }, 800);
+        } else {
+            errorBanner.classList.remove('hidden');
+            errorMsg.innerText = "Invalid token key. Please check the active generated token.";
+        }
+    }
+
+
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('toast');
+        document.getElementById('toastMessage').innerText = message;
+        toast.classList.remove('translate-y-24', 'opacity-0');
+        setTimeout(() => {
+            toast.classList.add('translate-y-24', 'opacity-0');
+        }, 3000);
+    }
+
+
+    window.onload = function() {
+        generateNewAdminToken();
+    };
+</script>
+</body>
+</html>
+```

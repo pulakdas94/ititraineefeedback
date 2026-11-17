@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Daily Classroom Activity Tracker</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            DEFAULT: '#25D366',
+                            dark: '#1EBE5D',
+                            bg: '#EFEAE2',
+                            bubble: '#D9FDD3',
+                            header: '#075E54'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Custom Confirmation Modal (Replaces native confirm()) -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 transform transition-all">
+            <div class="flex items-center gap-3 text-rose-600 mb-3">
+                <div class="p-2 bg-rose-100 rounded-xl">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h3 id="confirm-title" class="text-lg font-bold text-slate-900">Confirm Action</h3>
+            </div>
+            <p id="confirm-message" class="text-sm text-slate-600 mb-6">Are you sure you want to proceed?</p>
+            <div class="flex justify-end gap-3">
+                <button id="confirm-cancel-btn" class="px-4 py-2.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition">Cancel</button>
+                <button id="confirm-ok-btn" class="px-4 py-2.5 text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-sm transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Navigation & Admin Settings Bar -->
+    <header class="bg-indigo-950 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand -->
+                <div class="flex items-center gap-3">
+                    <div class="bg-indigo-600 p-2 rounded-xl shadow-inner">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight leading-tight">Faculty Activity Tracker</h1>
+                        <p class="text-xs text-indigo-300 hidden sm:block">Daily Classroom Log & Instant Admin WhatsApp Reporting</p>
+                    </div>
+                </div>
+
+                <!-- Admin WhatsApp Quick Toggle -->
+                <button id="toggle-admin-btn" type="button" class="flex items-center gap-2 bg-indigo-900/80 hover:bg-indigo-800 border border-indigo-700/70 px-3 py-2 rounded-xl text-xs sm:text-sm font-medium transition cursor-pointer">
+                    <span id="admin-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span class="hidden md:inline text-indigo-200">Admin WhatsApp:</span>
+                    <span id="header-admin-number" class="font-semibold text-white">Not Set</span>
+                    <svg class="w-4 h-4 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Admin WhatsApp Configuration Panel -->
+        <div id="admin-config-panel" class="bg-indigo-900 border-t border-indigo-800/80 transition-all">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div class="flex items-start sm:items-center gap-3">
+                        <div class="p-2 bg-emerald-500/20 text-emerald-300 rounded-xl mt-0.5 sm:mt-0">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-sm font-semibold text-white">Admin WhatsApp Receiver Setup</h2>
+                            <p class="text-xs text-indigo-200">Include country code without spaces (e.g., <span class="font-mono bg-indigo-950/60 px-1.5 py-0.5 rounded">+919876543210</span>). Saved automatically on this device.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <input type="tel" id="admin-whatsapp-input" placeholder="+91 98765 43210"
+                            class="w-full sm:w-56 px-3.5 py-2 rounded-xl bg-indigo-950/80 border border-indigo-700 text-white placeholder-indigo-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                        <button type="button" id="save-admin-btn"
+                            class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-indigo-950 font-semibold text-sm rounded-xl shadow-sm transition whitespace-nowrap cursor-pointer">
+                            Save Number
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+            <!-- Left Column: Activity Entry Form (7 cols on lg) -->
+            <div class="lg:col-span-7 space-y-6">
+                <form id="activity-form" class="space-y-6" novalidate>
+
+                    <!-- Card 1: Session & Class Details -->
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+                        <div class="flex items-center gap-2.5 mb-5 pb-3 border-b border-slate-100">
+                            <span class="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Session & Class Details</h2>
+                                <p class="text-xs text-slate-500">Faculty profile persists for faster subsequent entries</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Date -->
+                            <div>
+                                <label for="session-date" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Date <span class="text-rose-500">*</span></label>
+                                <input type="date" id="session-date" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Lecture / Period Slot -->
+                            <div>
+                                <label for="period-slot" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Lecture / Period Slot <span class="text-rose-500">*</span></label>
+                                <input type="text" id="period-slot" list="period-suggestions" placeholder="e.g., Period 1 (09:00 - 10:00 AM)" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <datalist id="period-suggestions">
+                                    <option value="Period 1 (09:00 AM - 10:00 AM)">
+                                    <option value="Period 2 (10:00 AM - 11:00 AM)">
+                                    <option value="Period 3 (11:15 AM - 12:15 PM)">
+                                    <option value="Period 4 (12:15 PM - 01:15 PM)">
+                                    <option value="Period 5 (02:00 PM - 03:00 PM)">
+                                    <option value="Period 6 (03:00 PM - 04:00 PM)">
+                                </datalist>
+                            </div>
+
+                            <!-- Faculty Name -->
+                            <div>
+                                <label for="faculty-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Faculty Name <span class="text-rose-500">*</span></label>
+                                <input type="text" id="faculty-name" placeholder="e.g., Dr. Ananya Sharma" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Department -->
+                            <div>
+                                <label for="department" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Department</label>
+                                <input type="text" id="department" placeholder="e.g., Computer Science / Science"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Class / Grade / Section -->
+                            <div>
+                                <label for="class-section" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Class / Grade / Section <span class="text-rose-500">*</span></label>
+                                <input type="text" id="class-section" placeholder="e.g., Grade 10 - Sec A / B.Tech CSE-II" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Subject Name -->
+                            <div>
+                                <label for="subject-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Subject Name <span class="text-rose-500">*</span></label>
+                                <input type="text" id="subject-name" placeholder="e.g., Data Structures / Physics" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Card 2: Student Attendance Summary -->
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+                        <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="p-2 bg-emerald-50 text-emerald-600 rounded-xl">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Student Attendance Summary</h2>
+                                    <p class="text-xs text-slate-500">Auto-calculates absentees & attendance rate</p>
+                                </div>
+                            </div>
+                            <span id="attendance-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700">
+                                0% Present
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-3 sm:gap-4">
+                            <!-- Total Students -->
+                            <div class="bg-slate-50 p-3 sm:p-4 rounded-xl border border-slate-200/70">
+                                <label for="total-students" class="block text-xs font-semibold text-slate-600 mb-1">Total Strength</label>
+                                <input type="number" id="total-students" min="0" max="500" placeholder="0"
+                                    class="w-full px-2.5 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 font-bold text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+
+                            <!-- Present Students -->
+                            <div class="bg-emerald-50/50 p-3 sm:p-4 rounded-xl border border-emerald-200/80">
+                                <label for="present-students" class="block text-xs font-semibold text-emerald-800 mb-1">Present</label>
+                                <input type="number" id="present-students" min="0" max="500" placeholder="0"
+                                    class="w-full px-2.5 py-2 rounded-lg border border-emerald-300 bg-white text-emerald-700 font-bold text-base sm:text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <!-- Absent Students (Auto-calculated) -->
+                            <div class="bg-rose-50/50 p-3 sm:p-4 rounded-xl border border-rose-200/80">
+                                <label for="absent-students" class="block text-xs font-semibold text-rose-800 mb-1">Absent</label>
+                                <input type="number" id="absent-students" readonly value="0"
+                                    class="w-full px-2.5 py-2 rounded-lg border border-rose-200 bg-rose-100/50 text-rose-700 font-bold text-base sm:text-lg cursor-not-allowed">
+                            </div>
+                        </div>
+                        <p id="attendance-warning" class="hidden text-xs text-rose-600 font-medium mt-2">
+                            * Present count cannot exceed Total Strength.
+                        </p>
+                    </section>
+
+                    <!-- Card 3: Classroom Activities Checklist & Log -->
+                    <section class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6 space-y-5">
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-slate-100">
+                            <span class="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                                </svg>
+                            </span>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Classroom Activities & Engagement</h2>
+                                <p class="text-xs text-slate-500">Tap activities completed during this session</p>
+                            </div>
+                        </div>
+
+                        <!-- Interactive Activity Pills -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2.5">Activities Conducted</label>
+                            <div id="activities-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <label class="activity-pill flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/40 cursor-pointer transition select-none">
+                                    <input type="checkbox" value="Lecture / Topic Delivery" class="activity-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked>
+                                    <span class="text-sm font-medium text-slate-700">📖 Lecture / Topic Delivery</span>
+                                </label>
+                                <label class="activity-pill flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/40 cursor-pointer transition select-none">
+                                    <input type="checkbox" value="Interactive Q&A / Doubt Clearing" class="activity-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                    <span class="text-sm font-medium text-slate-700">🙋 Interactive Q&A / Doubts</span>
+                                </label>
+                                <label class="activity-pill flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/40 cursor-pointer transition select-none">
+                                    <input type="checkbox" value="Practical / Lab / Demo" class="activity-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                    <span class="text-sm font-medium text-slate-700">🔬 Practical / Lab / Demo</span>
+                                </label>
+                                <label class="activity-pill flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/40 cursor-pointer transition select-none">
+                                    <input type="checkbox" value="Classwork / Quiz / Assessment" class="activity-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                    <span class="text-sm font-medium text-slate-700">📝 Classwork / Quiz / Test</span>
+                                </label>
+                                <label class="activity-pill flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/40 cursor-pointer transition select-none">
+                                    <input type="checkbox" value="Homework / Assignment Given" class="activity-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                                    <span class="text-sm font-medium text-slate-700">📚 Homework / Assignment</span>
+                                </label>
+                                <label class="activity-pill flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-indigo-50/40 cursor-pointer transition select-none">
+                                    <input type="checkbox" value="Attendance Marked in Portal" class="activity-checkbox w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked>
+                                    <span class="text-sm font-medium text-slate-700">✅ Attendance Marked in Portal</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Topic Covered -->
+                        <div>
+                            <label for="topic-covered" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Topic / Syllabus Covered <span class="text-rose-500">*</span></label>
+                            <input type="text" id="topic-covered" placeholder="e.g., Unit 3: Binary Search Trees & Traversal Algorithms" required
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+
+                        <!-- Student Engagement Level -->
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Student Engagement Level</label>
+                            <div id="engagement-selector" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <button type="button" data-value="High 🌟" class="engagement-btn active px-3 py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-800 text-xs sm:text-sm font-semibold transition cursor-pointer">
+                                    🌟 High
+                                </button>
+                                <button type="button" data-value="Good 👍" class="engagement-btn px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs sm:text-sm font-medium transition cursor-pointer">
+                                    👍 Good
+                                </button>
+                                <button type="button" data-value="Moderate 😐" class="engagement-btn px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs sm:text-sm font-medium transition cursor-pointer">
+                                    😐 Moderate
+                                </button>
+                                <button type="button" data-value="Needs Attention ⚠️" class="engagement-btn px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs sm:text-sm font-medium transition cursor-pointer">
+                                    ⚠️ Needs Attention
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Key Highlights / Remarks -->
+                        <div>
+                            <label for="remarks" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Key Highlights / Remarks / Follow-up Notes</label>
+                            <textarea id="remarks" rows="3" placeholder="Mention student participation, lab completion status, absentees follow-up, or discipline notes..."
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                    </section>
+                </form>
+            </div>
+
+            <!-- Right Column: Live WhatsApp Preview & Instant Actions (5 cols on lg) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
+                <!-- WhatsApp Style Preview Card -->
+                <div class="rounded-2xl overflow-hidden shadow-md border border-slate-200/90 bg-whatsapp-bg">
+                    <!-- Fake WhatsApp Chat Header -->
+                    <div class="bg-whatsapp-header text-white px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-emerald-600/80 flex items-center justify-center font-bold text-sm border border-emerald-400/40">
+                                AD
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold leading-tight flex items-center gap-1.5">
+                                    <span>Admin Office</span>
+                                    <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+                                </div>
+                                <p id="preview-recipient-number" class="text-[11px] text-emerald-100/90">Configure Admin WhatsApp above</p>
+                            </div>
+                        </div>
+                        <button type="button" id="copy-preview-btn" title="Copy formatted report"
+                            class="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium flex items-center gap-1.5 transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+
+                    <!-- Chat Wallpaper Area with Live Bubble -->
+                    <div class="p-4 sm:p-5 max-h-[430px] overflow-y-auto" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 16px 16px;">
+                        <div class="flex justify-center mb-3">
+                            <span class="bg-white/90 text-slate-600 text-[11px] font-medium px-3 py-1 rounded-full shadow-xs">
+                                LIVE WHATSAPP MESSAGE PREVIEW
+                            </span>
+                        </div>
+                        <div class="bg-whatsapp-bubble text-slate-900 rounded-2xl rounded-tr-xs p-3.5 sm:p-4 shadow-xs border border-emerald-200/70 relative ml-auto max-w-full">
+                            <pre id="whatsapp-preview-text" class="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-slate-800 break-words"></pre>
+                            <div class="flex items-center justify-end gap-1 mt-1.5 text-[10px] text-slate-500">
+                                <span id="preview-timestamp">Just now</span>
+                                <svg class="w-3.5 h-3.5 text-sky-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18 7l-1.41-1.41-6.34 6.34 1.41 1.41L18 7zm4.24-1.41L11.66 16.17 7.48 12l-1.41 1.41L11.66 19l12-12-1.42-1.41zM.41 13.41L6 19l1.41-1.41L1.83 12 .41 13.41z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instant Action Buttons -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 space-y-3">
+                    <!-- Primary WhatsApp Send CTA -->
+                    <button type="button" id="send-whatsapp-btn"
+                        class="w-full py-3.5 px-5 bg-whatsapp hover:bg-whatsapp-dark active:scale-[0.99] text-white font-bold text-sm sm:text-base rounded-xl shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2.5 transition cursor-pointer">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824z"/>
+                        </svg>
+                        <span>Send Report to Admin on WhatsApp</span>
+                    </button>
+
+                    <!-- Secondary Actions: Save Locally & Reset Form -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" id="save-local-btn"
+                            class="py-2.5 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs sm:text-sm rounded-xl border border-indigo-200/80 flex items-center justify-center gap-2 transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
+                            </svg>
+                            <span>Save Log Locally</span>
+                        </button>
+
+                        <button type="button" id="reset-form-btn"
+                            class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm rounded-xl border border-slate-200 flex items-center justify-center gap-2 transition cursor-pointer">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                            <span>Reset Form</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daily History Log Section -->
+        <section class="mt-10 sm:mt-12 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 sm:p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="p-2 bg-slate-100 text-slate-700 rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </span>
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-slate-900">Saved Classroom Activity Logs</h2>
+                        <p class="text-xs text-slate-500">Stored locally on your browser for quick re-sending or record keeping</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span id="logs-count-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700">
+                        0 Logs
+                    </span>
+                    <button type="button" id="clear-all-logs-btn" class="hidden text-xs font-semibold text-rose-600 hover:text-rose-700 px-3 py-1.5 rounded-xl hover:bg-rose-50 transition cursor-pointer">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- Logs Container -->
+            <div id="history-logs-container" class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Empty state injected via JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 text-center text-xs text-slate-400 border-t border-slate-200/60 bg-white">
+        <p>Faculty Daily Classroom Activity Tracker • Instant WhatsApp Admin Reporting</p>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        (function () {
+            'use strict';
+
+            // Storage Keys
+            const STORAGE_KEYS = {
+                ADMIN_PHONE: 'fcat_admin_whatsapp',
+                FACULTY_PROFILE: 'fcat_faculty_profile',
+                ACTIVITY_LOGS: 'fcat_activity_logs'
+            };
+
+            // DOM Elements
+            const els = {
+                // Admin config
+                toggleAdminBtn: document.getElementById('toggle-admin-btn'),
+                adminConfigPanel: document.getElementById('admin-config-panel'),
+                adminWhatsappInput: document.getElementById('admin-whatsapp-input'),
+                saveAdminBtn: document.getElementById('save-admin-btn'),
+                headerAdminNumber: document.getElementById('header-admin-number'),
+                adminStatusDot: document.getElementById('admin-status-dot'),
+                previewRecipientNumber: document.getElementById('preview-recipient-number'),
+
+                // Form inputs
+                form: document.getElementById('activity-form'),
+                sessionDate: document.getElementById('session-date'),
+                periodSlot: document.getElementById('period-slot'),
+                facultyName: document.getElementById('faculty-name'),
+                department: document.getElementById('department'),
+                classSection: document.getElementById('class-section'),
+                subjectName: document.getElementById('subject-name'),
+
+                // Attendance
+                totalStudents: document.getElementById('total-students'),
+                presentStudents: document.getElementById('present-students'),
+                absentStudents: document.getElementById('absent-students'),
+                attendanceBadge: document.getElementById('attendance-badge'),
+                attendanceWarning: document.getElementById('attendance-warning'),
+
+                // Activities & Details
+                activityCheckboxes: document.querySelectorAll('.activity-checkbox'),
+                topicCovered: document.getElementById('topic-covered'),
+                engagementBtns: document.querySelectorAll('.engagement-btn'),
+                remarks: document.getElementById('remarks'),
+
+                // Preview & Actions
+                whatsappPreviewText: document.getElementById('whatsapp-preview-text'),
+                previewTimestamp: document.getElementById('preview-timestamp'),
+                copyPreviewBtn: document.getElementById('copy-preview-btn'),
+                sendWhatsappBtn: document.getElementById('send-whatsapp-btn'),
+                saveLocalBtn: document.getElementById('save-local-btn'),
+                resetFormBtn: document.getElementById('reset-form-btn'),
+
+                // History Logs
+                historyLogsContainer: document.getElementById('history-logs-container'),
+                logsCountBadge: document.getElementById('logs-count-badge'),
+                clearAllLogsBtn: document.getElementById('clear-all-logs-btn'),
+
+                // Confirm Modal
+                confirmModal: document.getElementById('confirm-modal'),
+                confirmTitle: document.getElementById('confirm-title'),
+                confirmMessage: document.getElementById('confirm-message'),
+                confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
+                confirmOkBtn: document.getElementById('confirm-ok-btn')
+            };
+
+            // Application State
+            let state = {
+                adminPhone: '',
+                engagement: 'High 🌟',
+                logs: []
+            };
+
+            // Utility: Show Toast Notification
+            function showToast(message, type = 'success') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-slate-900 text-white border-emerald-500',
+                    error: 'bg-rose-600 text-white border-rose-800',
+                    info: 'bg-indigo-900 text-white border-indigo-400'
+                };
+                toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg border-l-4 text-xs sm:text-sm font-medium transform transition-all duration-300 translate-y-2 opacity-0 ${colors[type] || colors.success}`;
+                toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+                container.appendChild(toast);
+
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-2', 'opacity-0');
+                });
+
+                setTimeout(() => {
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+
+            // Utility: Custom Confirm Dialog (No native confirm())
+            function showConfirmDialog(title, message, onConfirm) {
+                els.confirmTitle.textContent = title;
+                els.confirmMessage.textContent = message;
+                els.confirmModal.classList.remove('hidden');
+                els.confirmModal.classList.add('flex');
+
+                const cleanup = () => {
+                    els.confirmModal.classList.add('hidden');
+                    els.confirmModal.classList.remove('flex');
+                    els.confirmOkBtn.onclick = null;
+                    els.confirmCancelBtn.onclick = null;
+                };
+
+                els.confirmCancelBtn.onclick = cleanup;
+                els.confirmOkBtn.onclick = () => {
+                    cleanup();
+                    onConfirm();
+                };
+            }
+
+            // Utility: Escape HTML to prevent XSS in history cards
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            // Utility: Copy Text using fallback execCommand for iframe safety
+            function copyTextToClipboard(text) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Report copied to clipboard!', 'success');
+                } catch (err) {
+                    showToast('Unable to copy text.', 'error');
+                }
+                document.body.removeChild(textarea);
+            }
+
+            // Utility: Sanitize Phone Number for wa.me
+            function sanitizePhoneForWhatsApp(raw) {
+                return (raw || '').replace(/[^\d]/g, '');
+            }
+
+            // Utility: Format Date Nicely
+            function formatDisplayDate(isoDate) {
+                if (!isoDate) return 'Not specified';
+                const parts = isoDate.split('-');
+                if (parts.length !== 3) return isoDate;
+                const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+                return dateObj.toLocaleDateString('en-IN', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            // Initialize Today's Date
+            function setTodayDate() {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                els.sessionDate.value = `${yyyy}-${mm}-${dd}`;
+            }
+
+            // Load Saved Settings & Logs from localStorage
+            function loadPersistedData() {
+                try {
+                    const savedPhone = localStorage.getItem(STORAGE_KEYS.ADMIN_PHONE);
+                    if (savedPhone) {
+                        state.adminPhone = savedPhone;
+                        els.adminWhatsappInput.value = savedPhone;
+                        updateAdminHeaderUI();
+                        // Collapse admin panel automatically if number is already configured
+                        els.adminConfigPanel.classList.add('hidden');
+                    }
+
+                    const savedProfile = JSON.parse(localStorage.getItem(STORAGE_KEYS.FACULTY_PROFILE) || '{}');
+                    if (savedProfile.facultyName) els.facultyName.value = savedProfile.facultyName;
+                    if (savedProfile.department) els.department.value = savedProfile.department;
+
+                    const savedLogs = JSON.parse(localStorage.getItem(STORAGE_KEYS.ACTIVITY_LOGS) || '[]');
+                    if (Array.isArray(savedLogs)) {
+                        state.logs = savedLogs;
+                    }
+                } catch (e) {
+                    console.error('Failed to load local storage data:', e);
+                }
+            }
+
+            // Update Admin Number Display in Header & Preview
+            function updateAdminHeaderUI() {
+                if (state.adminPhone && sanitizePhoneForWhatsApp(state.adminPhone).length >= 7) {
+                    els.headerAdminNumber.textContent = state.adminPhone;
+                    els.adminStatusDot.classList.remove('bg-amber-400');
+                    els.adminStatusDot.classList.add('bg-emerald-400');
+                    els.previewRecipientNumber.textContent = `To: ${state.adminPhone}`;
+                } else {
+                    els.headerAdminNumber.textContent = 'Not Set';
+                    els.adminStatusDot.classList.remove('bg-emerald-400');
+                    els.adminStatusDot.classList.add('bg-amber-400');
+                    els.previewRecipientNumber.textContent = 'Configure Admin WhatsApp above';
+                }
+            }
+
+            // Save Faculty Profile to localStorage
+            function persistFacultyProfile() {
+                try {
+                    localStorage.setItem(STORAGE_KEYS.FACULTY_PROFILE, JSON.stringify({
+                        facultyName: els.facultyName.value.trim(),
+                        department: els.department.value.trim()
+                    }));
+                } catch (e) {
+                    console.error('Failed saving faculty profile:', e);
+                }
+            }
+
+            // Attendance Calculation Logic
+            function calculateAttendance() {
+                const total = Math.max(0, parseInt(els.totalStudents.value, 10) || 0);
+                let present = Math.max(0, parseInt(els.presentStudents.value, 10) || 0);
+
+                if (total > 0 && present > total) {
+                    els.attendanceWarning.classList.remove('hidden');
+                    present = total;
+                } else {
+                    els.attendanceWarning.classList.add('hidden');
+                }
+
+                const absent = Math.max(0, total - present);
+                const percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+
+                els.absentStudents.value = absent;
+                els.attendanceBadge.textContent = `${percentage}% Present`;
+
+                // Dynamic badge color
+                els.attendanceBadge.className = 'px-3 py-1 rounded-full text-xs font-bold transition ';
+                if (total === 0) {
+                    els.attendanceBadge.className += 'bg-slate-100 text-slate-700';
+                } else if (percentage >= 75) {
+                    els.attendanceBadge.className += 'bg-emerald-100 text-emerald-800';
+                } else if (percentage >= 50) {
+                    els.attendanceBadge.className += 'bg-amber-100 text-amber-800';
+                } else {
+                    els.attendanceBadge.className += 'bg-rose-100 text-rose-800';
+                }
+
+                return { total, present, absent, percentage };
+            }
+
+            // Gather Current Form Data Object
+            function getFormData() {
+                const attendance = calculateAttendance();
+                const selectedActivities = [];
+                els.activityCheckboxes.forEach(cb => {
+                    if (cb.checked) selectedActivities.push(cb.value);
+                });
+
+                return {
+                    date: els.sessionDate.value,
+                    formattedDate: formatDisplayDate(els.sessionDate.value),
+                    periodSlot: els.periodSlot.value.trim(),
+                    facultyName: els.facultyName.value.trim(),
+                    department: els.department.value.trim(),
+                    classSection: els.classSection.value.trim(),
+                    subjectName: els.subjectName.value.trim(),
+                    attendance,
+                    activities: selectedActivities,
+                    topicCovered: els.topicCovered.value.trim(),
+                    engagement: state.engagement,
+                    remarks: els.remarks.value.trim()
+                };
+            }
+
+            // Format Report for WhatsApp
+            function buildWhatsAppMessage(data) {
+                const lines = [];
+                lines.push(`📋 *DAILY CLASSROOM ACTIVITY REPORT*`);
+                lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+                lines.push(`📅 *Date:* ${data.formattedDate}`);
+                lines.push(`⏰ *Slot:* ${data.periodSlot || '_Not specified_'}`);
+                lines.push(`👩‍🏫 *Faculty:* ${data.facultyName || '_Not specified_'}${data.department ? ` (${data.department})` : ''}`);
+                lines.push(`🏫 *Class:* ${data.classSection || '_Not specified_'}`);
+                lines.push(`📚 *Subject:* ${data.subjectName || '_Not specified_'}`);
+                lines.push(``);
+                lines.push(`👥 *STUDENT ATTENDANCE*`);
+                lines.push(`• Total: *${data.attendance.total}* | Present: *${data.attendance.present}* | Absent: *${data.attendance.absent}* (${data.attendance.percentage}%)`);
+                lines.push(``);
+                lines.push(`📖 *TOPIC COVERED*`);
+                lines.push(`${data.topicCovered || '_Pending entry_'}`);
+                lines.push(``);
+                lines.push(`✅ *ACTIVITIES CONDUCTED*`);
+                if (data.activities.length > 0) {
+                    data.activities.forEach(act => lines.push(`• ${act}`));
+                } else {
+                    lines.push(`• _None selected_`);
+                }
+                lines.push(``);
+                lines.push(`📊 *Engagement Level:* ${data.engagement}`);
+
+                if (data.remarks) {
+                    lines.push(``);
+                    lines.push(`📝 *Highlights / Remarks:*`);
+                    lines.push(`${data.remarks}`);
+                }
+
+                lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+                lines.push(`_Sent via Faculty Activity Tracker_`);
+
+                return lines.join('\n');
+            }
+
+            // Update Live Preview Card
+            function updateLivePreview() {
+                const data = getFormData();
+                els.whatsappPreviewText.textContent = buildWhatsAppMessage(data);
+
+                const now = new Date();
+                els.previewTimestamp.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Validate Form Before Sending or Saving
+            function validateForm(requireAdminPhone = false) {
+                if (requireAdminPhone) {
+                    const cleanPhone = sanitizePhoneForWhatsApp(state.adminPhone);
+                    if (!cleanPhone || cleanPhone.length < 7) {
+                        els.adminConfigPanel.classList.remove('hidden');
+                        els.adminWhatsappInput.focus();
+                        showToast('Please enter and save the Admin WhatsApp number first!', 'error');
+                        return false;
+                    }
+                }
+
+                const requiredFields = [
+                    { el: els.sessionDate, name: 'Date' },
+                    { el: els.periodSlot, name: 'Lecture / Period Slot' },
+                    { el: els.facultyName, name: 'Faculty Name' },
+                    { el: els.classSection, name: 'Class / Section' },
+                    { el: els.subjectName, name: 'Subject Name' },
+                    { el: els.topicCovered, name: 'Topic Covered' }
+                ];
+
+                for (const field of requiredFields) {
+                    if (!field.el.value.trim()) {
+                        field.el.focus();
+                        field.el.classList.add('ring-2', 'ring-rose-500', 'border-rose-500');
+                        setTimeout(() => field.el.classList.remove('ring-2', 'ring-rose-500', 'border-rose-500'), 2500);
+                        showToast(`Please fill in "${field.name}" before proceeding.`, 'error');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // Save Log Entry to localStorage
+            function saveLogEntry(data, reportedViaWhatsApp = false) {
+                const newEntry = {
+                    id: Date.now().toString(),
+                    createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    reportedViaWhatsApp,
+                    data,
+                    formattedMessage: buildWhatsAppMessage(data)
+                };
+
+                state.logs.unshift(newEntry);
+                try {
+                    localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOGS, JSON.stringify(state.logs));
+                } catch (e) {
+                    console.error('Failed to persist logs:', e);
+                }
+                renderHistoryLogs();
+            }
+
+            // Render Saved History Logs
+            function renderHistoryLogs() {
+                els.logsCountBadge.textContent = `${state.logs.length} ${state.logs.length === 1 ? 'Log' : 'Logs'}`;
+
+                if (state.logs.length === 0) {
+                    els.clearAllLogsBtn.classList.add('hidden');
+                    els.historyLogsContainer.innerHTML = `
+                        <div class="col-span-full py-10 px-4 text-center bg-slate-50/70 rounded-2xl border border-dashed border-slate-200">
+                            <p class="text-sm font-medium text-slate-600">No saved classroom logs yet.</p>
+                            <p class="text-xs text-slate-400 mt-1">Logs you send or save locally will appear here for quick access.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                els.clearAllLogsBtn.classList.remove('hidden');
+                els.historyLogsContainer.innerHTML = state.logs.map(log => {
+                    const d = log.data;
+                    return `
+                        <article class="bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/90 p-4 flex flex-col justify-between transition shadow-2xs">
+                            <div>
+                                <div class="flex items-start justify-between gap-2 mb-2">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-indigo-100 text-indigo-800">
+                                        ${escapeHtml(d.classSection)}
+                                    </span>
+                                    <span class="text-[11px] text-slate-400 font-medium">${escapeHtml(d.formattedDate)} • ${escapeHtml(log.createdAt)}</span>
+                                </div>
+                                <h3 class="text-sm font-bold text-slate-900 line-clamp-1">${escapeHtml(d.subjectName)}</h3>
+                                <p class="text-xs text-slate-500 mb-2.5">${escapeHtml(d.periodSlot)}</p>
+
+                                <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 mb-3 space-y-1.5">
+                                    <p class="text-xs text-slate-700 line-clamp-2"><span class="font-semibold text-slate-900">Topic:</span> ${escapeHtml(d.topicCovered)}</p>
+                                    <div class="flex items-center justify-between text-[11px] pt-1 border-t border-slate-100">
+                                        <span class="text-emerald-700 font-semibold">Present: ${d.attendance.present}/${d.attendance.total} (${d.attendance.percentage}%)</span>
+                                        <span class="text-slate-600 font-medium">${escapeHtml(d.engagement)}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-2 pt-2 border-t border-slate-200/70">
+                                <button type="button" data-action="resend" data-id="${log.id}"
+                                    class="flex-1 py-2 px-3 bg-whatsapp hover:bg-whatsapp-dark text-white text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                    <span>WhatsApp</span>
+                                </button>
+                                <button type="button" data-action="copy" data-id="${log.id}"
+                                    class="py-2 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer">
+                                    Copy
+                                </button>
+                                <button type="button" data-action="delete" data-id="${log.id}" title="Delete log"
+                                    class="p-2 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 rounded-xl transition cursor-pointer">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
+
+            // Open WhatsApp URL with Encoded Message
+            function launchWhatsApp(messageText) {
+                const cleanPhone = sanitizePhoneForWhatsApp(state.adminPhone);
+                if (!cleanPhone || cleanPhone.length < 7) {
+                    els.adminConfigPanel.classList.remove('hidden');
+                    els.adminWhatsappInput.focus();
+                    showToast('Please configure Admin WhatsApp number first.', 'error');
+                    return false;
+                }
+                const encodedMessage = encodeURIComponent(messageText);
+                const url = `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
+                window.open(url, '_blank', 'noopener,noreferrer');
+                return true;
+            }
+
+            // Event Listeners Setup
+            function bindEvents() {
+                // Toggle Admin Config Panel
+                els.toggleAdminBtn.addEventListener('click', () => {
+                    els.adminConfigPanel.classList.toggle('hidden');
+                });
+
+                // Save Admin WhatsApp Number
+                els.saveAdminBtn.addEventListener('click', () => {
+                    const val = els.adminWhatsappInput.value.trim();
+                    const digits = sanitizePhoneForWhatsApp(val);
+                    if (digits.length < 7) {
+                        showToast('Enter a valid phone number with country code (e.g. +919876543210).', 'error');
+                        return;
+                    }
+                    state.adminPhone = val.startsWith('+') ? val : `+${digits}`;
+                    els.adminWhatsappInput.value = state.adminPhone;
+                    localStorage.setItem(STORAGE_KEYS.ADMIN_PHONE, state.adminPhone);
+                    updateAdminHeaderUI();
+                    els.adminConfigPanel.classList.add('hidden');
+                    showToast('Admin WhatsApp number saved!', 'success');
+                });
+
+                // Live Preview Listeners on Inputs
+                const liveInputs = [
+                    els.sessionDate,
+                    els.periodSlot,
+                    els.facultyName,
+                    els.department,
+                    els.classSection,
+                    els.subjectName,
+                    els.totalStudents,
+                    els.presentStudents,
+                    els.topicCovered,
+                    els.remarks
+                ];
+
+                liveInputs.forEach(input => {
+                    input.addEventListener('input', () => {
+                        if (input === els.facultyName || input === els.department) {
+                            persistFacultyProfile();
+                        }
+                        updateLivePreview();
+                    });
+                });
+
+                // Activity Checkboxes
+                els.activityCheckboxes.forEach(cb => {
+                    cb.addEventListener('change', updateLivePreview);
+                });
+
+                // Engagement Level Selector Buttons
+                els.engagementBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        els.engagementBtns.forEach(b => {
+                            b.className = 'engagement-btn px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 text-xs sm:text-sm font-medium transition cursor-pointer';
+                        });
+                        btn.className = 'engagement-btn active px-3 py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-800 text-xs sm:text-sm font-semibold transition cursor-pointer';
+                        state.engagement = btn.dataset.value;
+                        updateLivePreview();
+                    });
+                });
+
+                // Copy Preview Button
+                els.copyPreviewBtn.addEventListener('click', () => {
+                    copyTextToClipboard(els.whatsappPreviewText.textContent);
+                });
+
+                // Primary Action: Send Report to Admin on WhatsApp
+                els.sendWhatsappBtn.addEventListener('click', () => {
+                    if (!validateForm(true)) return;
+                    const data = getFormData();
+                    const msg = buildWhatsAppMessage(data);
+                    if (launchWhatsApp(msg)) {
+                        saveLogEntry(data, true);
+                        showToast('Opening WhatsApp & saved log to history!', 'success');
+                    }
+                });
+
+                // Secondary Action: Save Log Locally
+                els.saveLocalBtn.addEventListener('click', () => {
+                    if (!validateForm(false)) return;
+                    const data = getFormData();
+                    saveLogEntry(data, false);
+                    showToast('Activity log saved locally!', 'success');
+                });
+
+                // Reset Form (Keeps Admin Number, Faculty Name, Department & Today's Date)
+                els.resetFormBtn.addEventListener('click', () => {
+                    els.periodSlot.value = '';
+                    els.classSection.value = '';
+                    els.subjectName.value = '';
+                    els.totalStudents.value = '';
+                    els.presentStudents.value = '';
+                    els.absentStudents.value = '0';
+                    els.topicCovered.value = '';
+                    els.remarks.value = '';
+                    setTodayDate();
+
+                    // Reset checkboxes to sensible defaults
+                    els.activityCheckboxes.forEach((cb, idx) => {
+                        cb.checked = (idx === 0 || idx === 5);
+                    });
+
+                    // Reset engagement to High
+                    els.engagementBtns[0].click();
+                    updateLivePreview();
+                    showToast('Form cleared for next class entry.', 'info');
+                });
+
+                // History Log Card Actions (Delegated)
+                els.historyLogsContainer.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-action]');
+                    if (!btn) return;
+
+                    const action = btn.dataset.action;
+                    const id = btn.dataset.id;
+                    const targetLog = state.logs.find(item => item.id === id);
+                    if (!targetLog) return;
+
+                    if (action === 'resend') {
+                        launchWhatsApp(targetLog.formattedMessage);
+                    } else if (action === 'copy') {
+                        copyTextToClipboard(targetLog.formattedMessage);
+                    } else if (action === 'delete') {
+                        showConfirmDialog(
+                            'Delete Activity Log',
+                            'Are you sure you want to remove this saved classroom log?',
+                            () => {
+                                state.logs = state.logs.filter(item => item.id !== id);
+                                localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOGS, JSON.stringify(state.logs));
+                                renderHistoryLogs();
+                                showToast('Log deleted.', 'info');
+                            }
+                        );
+                    }
+                });
+
+                // Clear All History Logs
+                els.clearAllLogsBtn.addEventListener('click', () => {
+                    showConfirmDialog(
+                        'Clear All Saved Logs',
+                        'This will permanently remove all saved classroom logs from this browser. Continue?',
+                        () => {
+                            state.logs = [];
+                            localStorage.removeItem(STORAGE_KEYS.ACTIVITY_LOGS);
+                            renderHistoryLogs();
+                            showToast('All saved logs cleared.', 'info');
+                        }
+                    );
+                });
+            }
+
+            // Initialize App
+            function init() {
+                setTodayDate();
+                loadPersistedData();
+                bindEvents();
+                updateLivePreview();
+                renderHistoryLogs();
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>

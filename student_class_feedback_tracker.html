@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Class Feedback Tracker</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Identity Services (GSI) for Direct Google Drive OAuth 2.0 Upload -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        whatsapp: {
+                            DEFAULT: '#25D366',
+                            dark: '#1EBE5D',
+                            bg: '#EFEAE2',
+                            bubble: '#D9FDD3',
+                            header: '#075E54'
+                        },
+                        gdrive: {
+                            blue: '#4285F4',
+                            green: '#34A853',
+                            yellow: '#FBBC05',
+                            red: '#EA4335'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Tactile Star Rating Micro-interactions */
+        .star-btn {
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.15s ease;
+        }
+        .star-btn:hover {
+            transform: scale(1.18);
+        }
+        .star-btn:active {
+            transform: scale(0.92);
+        }
+        /* Custom scrollbar for preview bubble */
+        .preview-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .preview-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(100, 116, 139, 0.25);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+    <!-- Toast Notification Stack -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 pointer-events-none max-w-sm w-full px-4 sm:px-0"></div>
+
+    <!-- Custom Confirmation Modal (Replaces native confirm/alert) -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/55 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-slate-100">
+            <div class="flex items-center gap-3 text-rose-600 mb-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                </div>
+                <h3 id="confirm-title" class="text-lg font-bold text-slate-900">Confirm Action</h3>
+            </div>
+            <p id="confirm-message" class="text-sm text-slate-600 leading-relaxed mb-6">Are you sure you want to continue?</p>
+            <div class="flex justify-end gap-3">
+                <button type="button" id="confirm-cancel-btn" class="px-4 py-2.5 text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition cursor-pointer">
+                    Cancel
+                </button>
+                <button type="button" id="confirm-ok-btn" class="px-4 py-2.5 text-sm font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-xl shadow-xs transition cursor-pointer">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Drive Fallback / Quick Upload Helper Modal -->
+    <div id="drive-fallback-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/55 backdrop-blur-xs p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 border border-slate-100">
+            <div class="flex items-start justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+                        <i class="fa-brands fa-google-drive text-2xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Feedback File Ready for Drive</h3>
+                        <p class="text-xs text-slate-500">Zero-Setup Instant Google Drive Sync</p>
+                    </div>
+                </div>
+                <button type="button" id="close-drive-modal-btn" class="p-2 text-slate-400 hover:text-slate-600 rounded-xl hover:bg-slate-100 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="bg-emerald-50 border border-emerald-200/80 rounded-xl p-3.5 mb-4 text-xs text-emerald-900 space-y-1">
+                <p class="font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                    <span>Report downloaded to your device!</span>
+                </p>
+                <p id="downloaded-filename-label" class="font-mono text-[11px] text-emerald-700 break-all"></p>
+            </div>
+
+            <p class="text-xs text-slate-600 leading-relaxed mb-5">
+                Since no Google Cloud OAuth Client ID is configured, your structured feedback report was downloaded automatically. Tap below to open your <strong>Google Drive</strong> and drop/upload it into your folder, or configure a Client ID in Settings for 1-click background uploads.
+            </p>
+
+            <div class="space-y-2.5">
+                <a href="https://drive.google.com/drive/my-drive" target="_blank" rel="noopener noreferrer" id="open-gdrive-portal-btn"
+                    class="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-xl shadow-sm flex items-center justify-center gap-2 transition">
+                    <i class="fa-brands fa-google-drive"></i>
+                    <span>Open My Google Drive to Upload</span>
+                    <i class="fa-solid fa-arrow-up-right-from-square text-xs opacity-80"></i>
+                </a>
+                <button type="button" id="switch-to-oauth-setup-btn"
+                    class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition cursor-pointer">
+                    <i class="fa-solid fa-gear mr-1.5"></i>Configure Direct Google Drive API (OAuth Client ID)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Sticky Navigation Header -->
+    <header class="bg-indigo-950 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16 gap-3">
+                <!-- App Identity -->
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-emerald-500 flex items-center justify-center shadow-inner shrink-0">
+                        <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
+                    </div>
+                    <div class="truncate">
+                        <h1 class="text-base sm:text-lg font-bold tracking-tight truncate">Student Class Feedback Tracker</h1>
+                        <p class="text-xs text-indigo-300 hidden sm:block truncate">Instant Post-Class Feedback • WhatsApp Admin Report • Google Drive Backup</p>
+                    </div>
+                </div>
+
+                <!-- Status & Setup Toggle Button -->
+                <button type="button" id="toggle-setup-drawer-btn"
+                    class="flex items-center gap-2.5 bg-indigo-900/90 hover:bg-indigo-800 border border-indigo-700/80 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition shrink-0 cursor-pointer">
+                    <span id="setup-status-indicator" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+                    <span class="hidden md:inline text-indigo-200">Admin & Drive Setup</span>
+                    <span class="md:hidden">Setup</span>
+                    <i id="setup-chevron-icon" class="fa-solid fa-sliders text-indigo-300 text-xs"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Collapsible Configuration Drawer (Admin WhatsApp + Google Drive API Setup) -->
+        <div id="setup-drawer" class="bg-indigo-900/95 border-t border-indigo-800 transition-all">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                    <!-- 1. Admin WhatsApp Configuration -->
+                    <div class="bg-indigo-950/60 border border-indigo-800/90 rounded-2xl p-4">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <span class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                                <i class="fa-brands fa-whatsapp text-sm"></i>
+                            </span>
+                            <h2 class="text-sm font-bold text-white">1. Admin WhatsApp Number</h2>
+                            <span id="admin-saved-badge" class="hidden ml-auto text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+                                Configured
+                            </span>
+                        </div>
+                        <p class="text-xs text-indigo-200/90 mb-3">
+                            Enter the Admin or Class Coordinator's WhatsApp number with country code (e.g., <code class="bg-indigo-900 px-1.5 py-0.5 rounded text-emerald-300">+919876543210</code>).
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <input type="tel" id="admin-phone-input" placeholder="+91 98765 43210"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-indigo-950 border border-indigo-700 text-white placeholder-indigo-400 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                            <button type="button" id="save-admin-phone-btn"
+                                class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-indigo-950 font-bold text-xs sm:text-sm rounded-xl transition whitespace-nowrap cursor-pointer">
+                                Save
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 2. Google Drive API Configuration (Optional for Direct OAuth Upload) -->
+                    <div class="bg-indigo-950/60 border border-indigo-800/90 rounded-2xl p-4">
+                        <div class="flex items-center gap-2.5 mb-2">
+                            <span class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-300 flex items-center justify-center">
+                                <i class="fa-brands fa-google-drive text-sm"></i>
+                            </span>
+                            <h2 class="text-sm font-bold text-white">2. Google Drive Sync Mode</h2>
+                            <span id="gdrive-mode-badge" class="ml-auto text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200">
+                                Instant Export Mode
+                            </span>
+                        </div>
+                        <p class="text-xs text-indigo-200/90 mb-3">
+                            Works out-of-the-box via <strong>Instant File Export + Drive Portal</strong>, or paste a Google Cloud <strong>OAuth 2.0 Client ID</strong> for direct API upload to a <em>"Class Feedback Logs"</em> folder.
+                        </p>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="gdrive-client-id-input" placeholder="Optional: 123456-abc.apps.googleusercontent.com"
+                                class="w-full px-3.5 py-2.5 rounded-xl bg-indigo-950 border border-indigo-700 text-white placeholder-indigo-400 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <button type="button" id="save-gdrive-id-btn"
+                                class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs sm:text-sm rounded-xl transition whitespace-nowrap cursor-pointer">
+                                Save ID
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+            <!-- Left Column: Student Feedback Form (7 Columns) -->
+            <div class="lg:col-span-7 space-y-6">
+                <form id="feedback-form" class="space-y-6" novalidate>
+
+                    <!-- Section 1: Student & Class Information -->
+                    <section class="bg-white rounded-2xl shadow-xs border border-slate-200/90 p-5 sm:p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3.5 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                    <i class="fa-solid fa-user-graduate"></i>
+                                </span>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Student & Class Details</h2>
+                                    <p class="text-xs text-slate-500">Your profile details stay saved for faster daily check-ins</p>
+                                </div>
+                            </div>
+
+                            <!-- Anonymous Mode Toggle Switch -->
+                            <label class="inline-flex items-center gap-2.5 cursor-pointer bg-slate-50 hover:bg-slate-100 px-3 py-2 rounded-xl border border-slate-200/80 transition select-none">
+                                <input type="checkbox" id="anonymous-toggle" class="sr-only peer">
+                                <div class="relative w-9 h-5 bg-slate-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-400 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                                <span class="text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-user-secret text-slate-500"></i>
+                                    <span>Anonymous</span>
+                                </span>
+                            </label>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Date -->
+                            <div>
+                                <label for="class-date" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Class Date <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="date" id="class-date" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Time / Period Slot -->
+                            <div>
+                                <label for="period-slot" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Period / Time Slot <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="period-slot" list="slot-options" placeholder="e.g., Lecture 2 (10:00 - 11:00 AM)" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                                <datalist id="slot-options">
+                                    <option value="Period 1 (09:00 AM - 10:00 AM)">
+                                    <option value="Period 2 (10:00 AM - 11:00 AM)">
+                                    <option value="Period 3 (11:15 AM - 12:15 PM)">
+                                    <option value="Period 4 (12:15 PM - 01:15 PM)">
+                                    <option value="Afternoon Lab (02:00 PM - 04:00 PM)">
+                                </datalist>
+                            </div>
+
+                            <!-- Student Name (Disabled when Anonymous is checked) -->
+                            <div id="student-name-wrapper">
+                                <label for="student-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Student Name <span id="name-required-star" class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="student-name" placeholder="e.g., Aarav Patel"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+                            </div>
+
+                            <!-- Roll Number / Student ID -->
+                            <div id="roll-no-wrapper">
+                                <label for="roll-number" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Roll No / Student ID
+                                </label>
+                                <input type="text" id="roll-number" placeholder="e.g., CS-2026-042"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+                            </div>
+
+                            <!-- Class / Grade / Batch -->
+                            <div>
+                                <label for="class-batch" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Class / Grade / Batch <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="class-batch" placeholder="e.g., B.Tech CSE Sem-4 / Grade 12-B" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Subject -->
+                            <div>
+                                <label for="subject-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Subject <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="subject-name" placeholder="e.g., Operating Systems / Mathematics" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+
+                            <!-- Faculty / Teacher Name -->
+                            <div class="sm:col-span-2">
+                                <label for="faculty-name" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">
+                                    Faculty / Teacher Name <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="faculty-name" placeholder="e.g., Prof. R. K. Verma" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 2: Post-Class Experience & Ratings -->
+                    <section class="bg-white rounded-2xl shadow-xs border border-slate-200/90 p-5 sm:p-6 space-y-6">
+                        <div class="flex items-center gap-2.5 pb-3.5 border-b border-slate-100">
+                            <span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </span>
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Post-Class Rating & Understanding</h2>
+                                <p class="text-xs text-slate-500">Tap to rate today's session in seconds</p>
+                            </div>
+                        </div>
+
+                        <!-- 1-5 Interactive Star Rating -->
+                        <div class="bg-slate-50/80 rounded-2xl p-4 border border-slate-200/70">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                                <label class="text-xs font-bold uppercase tracking-wider text-slate-700">
+                                    Overall Class Rating <span class="text-rose-500">*</span>
+                                </label>
+                                <span id="rating-label-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                    5/5 • Excellent 🌟
+                                </span>
+                            </div>
+                            <div id="star-rating-group" class="flex items-center justify-between sm:justify-start sm:gap-4 py-1" role="radiogroup" aria-label="Overall Class Rating">
+                                <button type="button" data-rating="1" class="star-btn p-2 text-2xl sm:text-3xl text-amber-400 focus:outline-none cursor-pointer" aria-label="1 Star - Needs Improvement">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                                <button type="button" data-rating="2" class="star-btn p-2 text-2xl sm:text-3xl text-amber-400 focus:outline-none cursor-pointer" aria-label="2 Stars - Fair">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                                <button type="button" data-rating="3" class="star-btn p-2 text-2xl sm:text-3xl text-amber-400 focus:outline-none cursor-pointer" aria-label="3 Stars - Good">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                                <button type="button" data-rating="4" class="star-btn p-2 text-2xl sm:text-3xl text-amber-400 focus:outline-none cursor-pointer" aria-label="4 Stars - Very Good">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                                <button type="button" data-rating="5" class="star-btn p-2 text-2xl sm:text-3xl text-amber-400 focus:outline-none cursor-pointer" aria-label="5 Stars - Excellent">
+                                    <i class="fa-solid fa-star"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Topic Clarity & Understanding -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                Topic Clarity & Understanding
+                            </label>
+                            <div id="clarity-group" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                <button type="button" data-value="Crystal Clear 💡" class="clarity-btn p-3 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 text-xs font-bold flex flex-col items-center gap-1.5 transition cursor-pointer">
+                                    <span class="text-lg">💡</span>
+                                    <span>Crystal Clear</span>
+                                </button>
+                                <button type="button" data-value="Mostly Clear 👍" class="clarity-btn p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold flex flex-col items-center gap-1.5 transition cursor-pointer">
+                                    <span class="text-lg">👍</span>
+                                    <span>Mostly Clear</span>
+                                </button>
+                                <button type="button" data-value="Need Revision 📖" class="clarity-btn p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold flex flex-col items-center gap-1.5 transition cursor-pointer">
+                                    <span class="text-lg">📖</span>
+                                    <span>Need Revision</span>
+                                </button>
+                                <button type="button" data-value="Confused 😕" class="clarity-btn p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold flex flex-col items-center gap-1.5 transition cursor-pointer">
+                                    <span class="text-lg">😕</span>
+                                    <span>Confused</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pace of Teaching -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                Pace of Teaching
+                            </label>
+                            <div id="pace-group" class="grid grid-cols-3 gap-2.5">
+                                <button type="button" data-value="Too Slow 🐢" class="pace-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs sm:text-sm font-semibold transition cursor-pointer">
+                                    🐢 Too Slow
+                                </button>
+                                <button type="button" data-value="Just Right ⚡" class="pace-btn py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-bold transition cursor-pointer">
+                                    ⚡ Just Right
+                                </button>
+                                <button type="button" data-value="Too Fast 🚀" class="pace-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs sm:text-sm font-semibold transition cursor-pointer">
+                                    🚀 Too Fast
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Aspect Tags (Multi-select pills) -->
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
+                                Quick Session Highlights (Select all that apply)
+                            </label>
+                            <div id="tags-group" class="flex flex-wrap gap-2">
+                                <button type="button" data-tag="Engaging Examples" class="tag-pill px-3.5 py-2 rounded-xl border border-indigo-300 bg-indigo-50 text-indigo-800 text-xs font-semibold transition cursor-pointer">
+                                    ✨ Engaging Examples
+                                </button>
+                                <button type="button" data-tag="Doubts Cleared" class="tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer">
+                                    🙋 Doubts Cleared
+                                </button>
+                                <button type="button" data-tag="Interactive Session" class="tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer">
+                                    💬 Interactive Session
+                                </button>
+                                <button type="button" data-tag="Good Pace" class="tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer">
+                                    ⏱️ Good Pace
+                                </button>
+                                <button type="button" data-tag="Well-Structured Notes" class="tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer">
+                                    📝 Well-Structured Notes
+                                </button>
+                                <button type="button" data-tag="More Practice Needed" class="tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer">
+                                    🧮 More Practice Needed
+                                </button>
+                                <button type="button" data-tag="Audio/Visual Issue" class="tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer">
+                                    🔊 Audio/Visual Issue
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Key Takeaway / What I Learned Today -->
+                        <div>
+                            <label for="key-takeaway" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                                Key Takeaway / Topic Learned Today <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" id="key-takeaway" placeholder="e.g., Understood Deadlock Prevention & Banker's Algorithm clearly" required
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        </div>
+
+                        <!-- Doubts / Suggestions for Faculty -->
+                        <div>
+                            <label for="doubts-suggestions" class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                                Doubts / Suggestions for Faculty (Optional)
+                            </label>
+                            <textarea id="doubts-suggestions" rows="3" placeholder="Any unresolved doubts, requests for extra numericals, or feedback for the teacher..."
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 bg-slate-50/50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"></textarea>
+                        </div>
+                    </section>
+                </form>
+            </div>
+
+            <!-- Right Column: Live WhatsApp Preview & Dual-Sync Actions (5 Columns) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-24 space-y-5">
+
+                <!-- Live WhatsApp Preview Card -->
+                <div class="rounded-2xl overflow-hidden shadow-md border border-slate-200/90 bg-whatsapp-bg">
+                    <!-- Mock WhatsApp Top Bar -->
+                    <div class="bg-whatsapp-header text-white px-4 py-3 flex items-center justify-between">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-xs border border-emerald-400/40 shrink-0">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <div class="truncate">
+                                <div class="text-sm font-bold leading-tight flex items-center gap-1.5">
+                                    <span>Class Admin</span>
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                </div>
+                                <p id="preview-admin-phone" class="text-[11px] text-emerald-100/90 truncate">Set Admin WhatsApp in Setup</p>
+                            </div>
+                        </div>
+                        <button type="button" id="copy-preview-btn"
+                            class="px-3 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold flex items-center gap-1.5 transition shrink-0 cursor-pointer">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+
+                    <!-- Chat Bubble Container -->
+                    <div class="p-4 sm:p-5 max-h-[410px] overflow-y-auto preview-scroll" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 16px 16px;">
+                        <div class="flex justify-center mb-3">
+                            <span class="bg-white/95 text-slate-600 text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full shadow-2xs">
+                                Live WhatsApp Report Preview
+                            </span>
+                        </div>
+                        <div class="bg-whatsapp-bubble text-slate-900 rounded-2xl rounded-tr-xs p-3.5 sm:p-4 shadow-xs border border-emerald-200/80 ml-auto">
+                            <pre id="whatsapp-preview-box" class="whitespace-pre-wrap font-sans text-[13px] leading-relaxed text-slate-800 break-words"></pre>
+                            <div class="flex items-center justify-end gap-1.5 mt-2 text-[10px] text-slate-500">
+                                <span id="preview-clock">Just now</span>
+                                <i class="fa-solid fa-check-double text-sky-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary & Secondary Action Panel -->
+                <div class="bg-white rounded-2xl shadow-xs border border-slate-200/90 p-4 sm:p-5 space-y-3">
+                    <!-- Primary CTA 1: Send to Admin on WhatsApp -->
+                    <button type="button" id="send-whatsapp-btn"
+                        class="w-full py-3.5 px-5 bg-whatsapp hover:bg-whatsapp-dark active:scale-[0.99] text-white font-bold text-sm sm:text-base rounded-xl shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2.5 transition cursor-pointer">
+                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                        <span>Send to Admin on WhatsApp</span>
+                    </button>
+
+                    <!-- Primary CTA 2: Save to Google Drive -->
+                    <button type="button" id="save-gdrive-btn"
+                        class="w-full py-3.5 px-5 bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-sm sm:text-base rounded-xl shadow-md shadow-blue-500/20 flex items-center justify-center gap-2.5 transition cursor-pointer">
+                        <i class="fa-brands fa-google-drive text-lg"></i>
+                        <span id="save-gdrive-btn-text">Save to Google Drive</span>
+                    </button>
+
+                    <!-- Secondary Utility Buttons -->
+                    <div class="grid grid-cols-3 gap-2 pt-1">
+                        <button type="button" id="save-history-btn"
+                            class="py-2.5 px-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold text-xs rounded-xl border border-indigo-200/80 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                            <i class="fa-solid fa-bookmark"></i>
+                            <span>Save Log</span>
+                        </button>
+                        <button type="button" id="copy-feedback-btn"
+                            class="py-2.5 px-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                            <i class="fa-regular fa-copy"></i>
+                            <span>Copy Text</span>
+                        </button>
+                        <button type="button" id="clear-form-btn"
+                            class="py-2.5 px-2.5 bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 font-semibold text-xs rounded-xl border border-slate-200 flex items-center justify-center gap-1.5 transition cursor-pointer">
+                            <i class="fa-solid fa-rotate-left"></i>
+                            <span>Clear</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Student's Local Feedback History & Batch Google Drive Export -->
+        <section class="mt-10 sm:mt-12 bg-white rounded-2xl shadow-xs border border-slate-200/90 p-5 sm:p-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 class="text-base sm:text-lg font-bold text-slate-900">My Submitted Feedback History</h2>
+                            <span id="history-count-pill" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">
+                                0
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500">Saved locally on your device • Export all logs anytime to back up on Google Drive</p>
+                    </div>
+                </div>
+
+                <!-- Batch Export & Clear Controls -->
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <button type="button" id="export-all-csv-drive-btn"
+                        class="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold text-xs sm:text-sm rounded-xl flex items-center gap-2 transition cursor-pointer">
+                        <i class="fa-brands fa-google-drive"></i>
+                        <span>Export All Logs (CSV) for Google Drive</span>
+                    </button>
+                    <button type="button" id="clear-history-btn" class="hidden px-3 py-2.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition cursor-pointer">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+
+            <!-- History Cards Grid -->
+            <div id="history-grid" class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dynamically rendered via JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-5 text-center text-xs text-slate-400 border-t border-slate-200/70 bg-white">
+        <p>Student Class Feedback Tracker • Instant Admin WhatsApp Reporting & Google Drive Sync</p>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        (function () {
+            'use strict';
+
+            // LocalStorage Keys
+            const KEYS = {
+                ADMIN_PHONE: 'scft_admin_whatsapp',
+                GDRIVE_CLIENT_ID: 'scft_gdrive_client_id',
+                STUDENT_PROFILE: 'scft_student_profile',
+                FEEDBACK_LOGS: 'scft_feedback_logs'
+            };
+
+            // Rating Labels Map
+            const RATING_LABELS = {
+                1: { text: '1/5 • Needs Improvement 😞', badgeClass: 'bg-rose-100 text-rose-800' },
+                2: { text: '2/5 • Fair 😐', badgeClass: 'bg-orange-100 text-orange-800' },
+                3: { text: '3/5 • Good 🙂', badgeClass: 'bg-yellow-100 text-yellow-800' },
+                4: { text: '4/5 • Very Good 😊', badgeClass: 'bg-emerald-100 text-emerald-800' },
+                5: { text: '5/5 • Excellent 🌟', badgeClass: 'bg-amber-100 text-amber-800' }
+            };
+
+            // Application State
+            const state = {
+                adminPhone: '',
+                gdriveClientId: '',
+                gdriveAccessToken: null,
+                rating: 5,
+                clarity: 'Crystal Clear 💡',
+                pace: 'Just Right ⚡',
+                selectedTags: new Set(['Engaging Examples']),
+                logs: []
+            };
+
+            // Cached DOM References
+            const el = {
+                // Drawer & Setup
+                toggleSetupBtn: document.getElementById('toggle-setup-drawer-btn'),
+                setupDrawer: document.getElementById('setup-drawer'),
+                setupStatusIndicator: document.getElementById('setup-status-indicator'),
+                adminPhoneInput: document.getElementById('admin-phone-input'),
+                saveAdminPhoneBtn: document.getElementById('save-admin-phone-btn'),
+                adminSavedBadge: document.getElementById('admin-saved-badge'),
+                gdriveClientIdInput: document.getElementById('gdrive-client-id-input'),
+                saveGdriveIdBtn: document.getElementById('save-gdrive-id-btn'),
+                gdriveModeBadge: document.getElementById('gdrive-mode-badge'),
+
+                // Form Fields
+                classDate: document.getElementById('class-date'),
+                periodSlot: document.getElementById('period-slot'),
+                anonymousToggle: document.getElementById('anonymous-toggle'),
+                studentName: document.getElementById('student-name'),
+                nameRequiredStar: document.getElementById('name-required-star'),
+                rollNumber: document.getElementById('roll-number'),
+                classBatch: document.getElementById('class-batch'),
+                subjectName: document.getElementById('subject-name'),
+                facultyName: document.getElementById('faculty-name'),
+
+                // Ratings & Controls
+                starBtns: document.querySelectorAll('.star-btn'),
+                ratingLabelBadge: document.getElementById('rating-label-badge'),
+                clarityBtns: document.querySelectorAll('.clarity-btn'),
+                paceBtns: document.querySelectorAll('.pace-btn'),
+                tagPills: document.querySelectorAll('.tag-pill'),
+                keyTakeaway: document.getElementById('key-takeaway'),
+                doubtsSuggestions: document.getElementById('doubts-suggestions'),
+
+                // Preview & Actions
+                previewAdminPhone: document.getElementById('preview-admin-phone'),
+                whatsappPreviewBox: document.getElementById('whatsapp-preview-box'),
+                previewClock: document.getElementById('preview-clock'),
+                copyPreviewBtn: document.getElementById('copy-preview-btn'),
+                sendWhatsappBtn: document.getElementById('send-whatsapp-btn'),
+                saveGdriveBtn: document.getElementById('save-gdrive-btn'),
+                saveGdriveBtnText: document.getElementById('save-gdrive-btn-text'),
+                saveHistoryBtn: document.getElementById('save-history-btn'),
+                copyFeedbackBtn: document.getElementById('copy-feedback-btn'),
+                clearFormBtn: document.getElementById('clear-form-btn'),
+
+                // History
+                historyGrid: document.getElementById('history-grid'),
+                historyCountPill: document.getElementById('history-count-pill'),
+                exportAllCsvDriveBtn: document.getElementById('export-all-csv-drive-btn'),
+                clearHistoryBtn: document.getElementById('clear-history-btn'),
+
+                // Modals
+                confirmModal: document.getElementById('confirm-modal'),
+                confirmTitle: document.getElementById('confirm-title'),
+                confirmMessage: document.getElementById('confirm-message'),
+                confirmCancelBtn: document.getElementById('confirm-cancel-btn'),
+                confirmOkBtn: document.getElementById('confirm-ok-btn'),
+                driveFallbackModal: document.getElementById('drive-fallback-modal'),
+                closeDriveModalBtn: document.getElementById('close-drive-modal-btn'),
+                downloadedFilenameLabel: document.getElementById('downloaded-filename-label'),
+                switchToOauthSetupBtn: document.getElementById('switch-to-oauth-setup-btn')
+            };
+
+            // Utility: Escape HTML safely
+            function escapeHtml(text) {
+                if (!text) return '';
+                return String(text)
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            // Utility: Toast Notification
+            function showToast(message, type = 'success', actionHtml = '') {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const theme = {
+                    success: 'bg-slate-900 text-white border-emerald-500',
+                    error: 'bg-rose-600 text-white border-rose-800',
+                    info: 'bg-indigo-950 text-white border-blue-400'
+                }[type] || 'bg-slate-900 text-white border-emerald-500';
+
+                toast.className = `pointer-events-auto p-3.5 rounded-xl shadow-xl border-l-4 text-xs sm:text-sm font-medium transition-all duration-300 translate-y-2 opacity-0 ${theme}`;
+                toast.innerHTML = `
+                    <div class="flex items-center justify-between gap-3">
+                        <span>${escapeHtml(message)}</span>
+                        ${actionHtml}
+                    </div>
+                `;
+                container.appendChild(toast);
+
+                requestAnimationFrame(() => toast.classList.remove('translate-y-2', 'opacity-0'));
+
+                setTimeout(() => {
+                    toast.classList.add('translate-y-2', 'opacity-0');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            }
+
+            // Utility: Custom Confirmation Dialog (No native confirm/alert)
+            function askConfirmation(title, message, onConfirm) {
+                el.confirmTitle.textContent = title;
+                el.confirmMessage.textContent = message;
+                el.confirmModal.classList.remove('hidden');
+                el.confirmModal.classList.add('flex');
+
+                const close = () => {
+                    el.confirmModal.classList.add('hidden');
+                    el.confirmModal.classList.remove('flex');
+                    el.confirmOkBtn.onclick = null;
+                    el.confirmCancelBtn.onclick = null;
+                };
+
+                el.confirmCancelBtn.onclick = close;
+                el.confirmOkBtn.onclick = () => {
+                    close();
+                    onConfirm();
+                };
+            }
+
+            // Utility: Copy to Clipboard using iframe-safe execCommand
+            function copyToClipboard(text) {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('Feedback copied to clipboard!', 'success');
+                } catch (err) {
+                    showToast('Unable to copy text.', 'error');
+                }
+                document.body.removeChild(ta);
+            }
+
+            // Utility: Digits-only phone sanitizer
+            function cleanPhoneDigits(phone) {
+                return (phone || '').replace(/[^\d]/g, '');
+            }
+
+            // Utility: Set today's date in YYYY-MM-DD
+            function setTodayDate() {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                el.classDate.value = `${yyyy}-${mm}-${dd}`;
+            }
+
+            // Utility: Format YYYY-MM-DD to readable date
+            function formatHumanDate(iso) {
+                if (!iso) return 'Not specified';
+                const parts = iso.split('-');
+                if (parts.length !== 3) return iso;
+                const d = new Date(parts[0], parts[1] - 1, parts[2]);
+                return d.toLocaleDateString('en-IN', {
+                    weekday: 'short',
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+
+            // Load persisted settings & logs
+            function loadFromStorage() {
+                try {
+                    const savedPhone = localStorage.getItem(KEYS.ADMIN_PHONE) || '';
+                    if (savedPhone) {
+                        state.adminPhone = savedPhone;
+                        el.adminPhoneInput.value = savedPhone;
+                    }
+
+                    const savedClientId = localStorage.getItem(KEYS.GDRIVE_CLIENT_ID) || '';
+                    if (savedClientId) {
+                        state.gdriveClientId = savedClientId;
+                        el.gdriveClientIdInput.value = savedClientId;
+                    }
+
+                    const profile = JSON.parse(localStorage.getItem(KEYS.STUDENT_PROFILE) || '{}');
+                    if (profile.studentName) el.studentName.value = profile.studentName;
+                    if (profile.rollNumber) el.rollNumber.value = profile.rollNumber;
+                    if (profile.classBatch) el.classBatch.value = profile.classBatch;
+                    if (profile.isAnonymous) {
+                        el.anonymousToggle.checked = true;
+                        applyAnonymousState(true);
+                    }
+
+                    const logs = JSON.parse(localStorage.getItem(KEYS.FEEDBACK_LOGS) || '[]');
+                    if (Array.isArray(logs)) state.logs = logs;
+                } catch (err) {
+                    console.error('Error loading saved data:', err);
+                }
+                refreshSetupUI();
+            }
+
+            // Save student profile for quick reuse
+            function persistStudentProfile() {
+                try {
+                    localStorage.setItem(KEYS.STUDENT_PROFILE, JSON.stringify({
+                        studentName: el.studentName.value.trim(),
+                        rollNumber: el.rollNumber.value.trim(),
+                        classBatch: el.classBatch.value.trim(),
+                        isAnonymous: el.anonymousToggle.checked
+                    }));
+                } catch (err) {
+                    console.error('Error saving student profile:', err);
+                }
+            }
+
+            // Refresh Setup Drawer Badges & Status Indicators
+            function refreshSetupUI() {
+                const hasPhone = cleanPhoneDigits(state.adminPhone).length >= 7;
+                const hasDriveOAuth = state.gdriveClientId.trim().length > 10;
+
+                if (hasPhone) {
+                    el.adminSavedBadge.classList.remove('hidden');
+                    el.previewAdminPhone.textContent = `To: ${state.adminPhone}`;
+                    el.setupStatusIndicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+                    // Auto-collapse drawer if Admin WhatsApp is already set
+                    el.setupDrawer.classList.add('hidden');
+                } else {
+                    el.adminSavedBadge.classList.add('hidden');
+                    el.previewAdminPhone.textContent = 'Set Admin WhatsApp in Setup';
+                    el.setupStatusIndicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+                }
+
+                if (hasDriveOAuth) {
+                    el.gdriveModeBadge.textContent = 'Direct OAuth API Ready';
+                    el.gdriveModeBadge.className = 'ml-auto text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/25 text-emerald-300';
+                    el.saveGdriveBtnText.textContent = 'Save Directly to Google Drive';
+                } else {
+                    el.gdriveModeBadge.textContent = 'Instant Export Mode';
+                    el.gdriveModeBadge.className = 'ml-auto text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-200';
+                    el.saveGdriveBtnText.textContent = 'Save to Google Drive';
+                }
+            }
+
+            // Toggle Anonymous Mode
+            function applyAnonymousState(isAnon) {
+                el.studentName.disabled = isAnon;
+                el.rollNumber.disabled = isAnon;
+                if (isAnon) {
+                    el.nameRequiredStar.classList.add('hidden');
+                } else {
+                    el.nameRequiredStar.classList.remove('hidden');
+                }
+            }
+
+            // Update Star Visuals
+            function renderStars(rating) {
+                state.rating = rating;
+                el.starBtns.forEach(btn => {
+                    const val = parseInt(btn.dataset.rating, 10);
+                    if (val <= rating) {
+                        btn.classList.remove('text-slate-300');
+                        btn.classList.add('text-amber-400');
+                    } else {
+                        btn.classList.remove('text-amber-400');
+                        btn.classList.add('text-slate-300');
+                    }
+                });
+
+                const meta = RATING_LABELS[rating] || RATING_LABELS[5];
+                el.ratingLabelBadge.textContent = meta.text;
+                el.ratingLabelBadge.className = `px-3 py-1 rounded-full text-xs font-bold ${meta.badgeClass}`;
+            }
+
+            // Collect Current Form Payload
+            function collectFormData() {
+                const isAnon = el.anonymousToggle.checked;
+                const studentDisplay = isAnon
+                    ? 'Anonymous Student'
+                    : (el.studentName.value.trim() || 'Not specified');
+                const rollDisplay = isAnon
+                    ? 'Hidden'
+                    : (el.rollNumber.value.trim() || '');
+
+                return {
+                    date: el.classDate.value,
+                    formattedDate: formatHumanDate(el.classDate.value),
+                    periodSlot: el.periodSlot.value.trim(),
+                    isAnonymous: isAnon,
+                    studentName: studentDisplay,
+                    rollNumber: rollDisplay,
+                    classBatch: el.classBatch.value.trim(),
+                    subjectName: el.subjectName.value.trim(),
+                    facultyName: el.facultyName.value.trim(),
+                    rating: state.rating,
+                    ratingLabel: RATING_LABELS[state.rating].text,
+                    clarity: state.clarity,
+                    pace: state.pace,
+                    tags: Array.from(state.selectedTags),
+                    keyTakeaway: el.keyTakeaway.value.trim(),
+                    doubtsSuggestions: el.doubtsSuggestions.value.trim()
+                };
+            }
+
+            // Format Clean WhatsApp Message
+            function formatWhatsAppReport(data) {
+                const starsVisual = '⭐'.repeat(data.rating);
+                const lines = [
+                    `🎓 *STUDENT POST-CLASS FEEDBACK*`,
+                    `━━━━━━━━━━━━━━━━━━━━`,
+                    `📅 *Date:* ${data.formattedDate}`,
+                    `⏰ *Slot:* ${data.periodSlot || '_Not specified_'}`,
+                    `🏫 *Class/Batch:* ${data.classBatch || '_Not specified_'}`,
+                    `📚 *Subject:* ${data.subjectName || '_Not specified_'}`,
+                    `👩‍🏫 *Faculty:* ${data.facultyName || '_Not specified_'}`,
+                    `👤 *Student:* ${data.studentName}${data.rollNumber && !data.isAnonymous ? ` (ID: ${data.rollNumber})` : ''}`,
+                    ``,
+                    `⭐ *Overall Rating:* ${starsVisual} (${data.ratingLabel})`,
+                    `💡 *Topic Clarity:* ${data.clarity}`,
+                    `⚡ *Teaching Pace:* ${data.pace}`,
+                    `🏷️ *Highlights:* ${data.tags.length > 0 ? data.tags.join(', ') : '_None selected_'}`,
+                    ``,
+                    `📌 *Key Takeaway:*`,
+                    `${data.keyTakeaway || '_Pending entry_'}`
+                ];
+
+                if (data.doubtsSuggestions) {
+                    lines.push(``);
+                    lines.push(`💬 *Doubts / Suggestions:*`);
+                    lines.push(`${data.doubtsSuggestions}`);
+                }
+
+                lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+                lines.push(`_Submitted via Student Class Feedback Tracker_`);
+                return lines.join('\n');
+            }
+
+            // Update Live WhatsApp Preview Card
+            function updatePreview() {
+                const data = collectFormData();
+                el.whatsappPreviewBox.textContent = formatWhatsAppReport(data);
+                el.previewClock.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+
+            // Validate Required Fields
+            function validateInputs(requireAdminPhone = false) {
+                if (requireAdminPhone) {
+                    const digits = cleanPhoneDigits(state.adminPhone);
+                    if (digits.length < 7) {
+                        el.setupDrawer.classList.remove('hidden');
+                        el.adminPhoneInput.focus();
+                        showToast('Please enter and save the Admin WhatsApp number first!', 'error');
+                        return false;
+                    }
+                }
+
+                const checks = [
+                    { input: el.classDate, label: 'Class Date' },
+                    { input: el.periodSlot, label: 'Period / Time Slot' },
+                    ...(!el.anonymousToggle.checked ? [{ input: el.studentName, label: 'Student Name' }] : []),
+                    { input: el.classBatch, label: 'Class / Grade / Batch' },
+                    { input: el.subjectName, label: 'Subject' },
+                    { input: el.facultyName, label: 'Faculty / Teacher Name' },
+                    { input: el.keyTakeaway, label: 'Key Takeaway / Topic Learned' }
+                ];
+
+                for (const item of checks) {
+                    if (!item.input.value.trim()) {
+                        item.input.focus();
+                        item.input.classList.add('ring-2', 'ring-rose-500', 'border-rose-500');
+                        setTimeout(() => item.input.classList.remove('ring-2', 'ring-rose-500', 'border-rose-500'), 2400);
+                        showToast(`Please fill in "${item.label}" first.`, 'error');
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // Save or Update Entry in Local History
+            function upsertHistoryLog(data, flags = {}) {
+                const formattedMessage = formatWhatsAppReport(data);
+                const entry = {
+                    id: Date.now().toString(),
+                    submittedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    whatsappSent: Boolean(flags.whatsappSent),
+                    driveSaved: Boolean(flags.driveSaved),
+                    data,
+                    formattedMessage
+                };
+
+                state.logs.unshift(entry);
+                try {
+                    localStorage.setItem(KEYS.FEEDBACK_LOGS, JSON.stringify(state.logs));
+                } catch (err) {
+                    console.error('Failed saving feedback log:', err);
+                }
+                renderHistory();
+                return entry;
+            }
+
+            // Render Submitted Feedback History Cards
+            function renderHistory() {
+                el.historyCountPill.textContent = state.logs.length;
+
+                if (state.logs.length === 0) {
+                    el.clearHistoryBtn.classList.add('hidden');
+                    el.historyGrid.innerHTML = `
+                        <div class="col-span-full py-10 px-4 text-center bg-slate-50/80 rounded-2xl border border-dashed border-slate-200">
+                            <i class="fa-regular fa-folder-open text-2xl text-slate-400 mb-2"></i>
+                            <p class="text-sm font-semibold text-slate-600">No feedback logs recorded yet</p>
+                            <p class="text-xs text-slate-400 mt-1">Feedbacks you send via WhatsApp or save to Google Drive will appear here.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                el.clearHistoryBtn.classList.remove('hidden');
+                el.historyGrid.innerHTML = state.logs.map(log => {
+                    const d = log.data;
+                    const stars = '★'.repeat(d.rating) + '☆'.repeat(5 - d.rating);
+                    return `
+                        <article class="bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/90 p-4 flex flex-col justify-between transition shadow-2xs">
+                            <div>
+                                <!-- Top Row: Date & Status Badges -->
+                                <div class="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
+                                    <span class="text-[11px] font-semibold text-slate-500">
+                                        ${escapeHtml(d.formattedDate)} • ${escapeHtml(log.submittedAt)}
+                                    </span>
+                                    <div class="flex items-center gap-1.5">
+                                        ${log.whatsappSent ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800"><i class="fa-brands fa-whatsapp mr-0.5"></i>Sent</span>` : ''}
+                                        ${log.driveSaved ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-100 text-blue-800"><i class="fa-brands fa-google-drive mr-0.5"></i>Drive</span>` : ''}
+                                    </div>
+                                </div>
+
+                                <!-- Subject & Faculty -->
+                                <h3 class="text-sm font-bold text-slate-900 line-clamp-1">${escapeHtml(d.subjectName)}</h3>
+                                <p class="text-xs text-slate-500 mb-2.5">
+                                    ${escapeHtml(d.facultyName)} • <span class="font-medium text-slate-700">${escapeHtml(d.classBatch)}</span>
+                                </p>
+
+                                <!-- Rating & Takeaway Summary -->
+                                <div class="bg-white rounded-xl p-3 border border-slate-200/70 mb-3 space-y-1.5">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="text-amber-500 font-bold tracking-wider">${stars}</span>
+                                        <span class="text-[11px] font-semibold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md">${escapeHtml(d.clarity)}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-700 line-clamp-2">
+                                        <span class="font-semibold text-slate-900">Takeaway:</span> ${escapeHtml(d.keyTakeaway)}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Card Footer Actions -->
+                            <div class="flex items-center gap-2 pt-2 border-t border-slate-200/70">
+                                <button type="button" data-action="whatsapp" data-id="${log.id}"
+                                    class="flex-1 py-2 px-2.5 bg-whatsapp hover:bg-whatsapp-dark text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                    <i class="fa-brands fa-whatsapp"></i>
+                                    <span>WhatsApp</span>
+                                </button>
+                                <button type="button" data-action="drive" data-id="${log.id}"
+                                    class="flex-1 py-2 px-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 transition cursor-pointer">
+                                    <i class="fa-brands fa-google-drive"></i>
+                                    <span>Drive</span>
+                                </button>
+                                <button type="button" data-action="delete" data-id="${log.id}" title="Delete record"
+                                    class="p-2 bg-white hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200 rounded-xl transition cursor-pointer">
+                                    <i class="fa-solid fa-trash-can text-xs"></i>
+                                </button>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
+
+            // Open WhatsApp with Encoded Report
+            function sendViaWhatsApp(messageText) {
+                const digits = cleanPhoneDigits(state.adminPhone);
+                if (digits.length < 7) {
+                    el.setupDrawer.classList.remove('hidden');
+                    el.adminPhoneInput.focus();
+                    showToast('Configure Admin WhatsApp number first.', 'error');
+                    return false;
+                }
+                const waUrl = `https://wa.me/${digits}?text=${encodeURIComponent(messageText)}`;
+                window.open(waUrl, '_blank', 'noopener,noreferrer');
+                return true;
+            }
+
+            // Build Formatted Document Content for Google Drive
+            function buildDriveFileContent(data) {
+                const reportText = formatWhatsAppReport(data).replace(/\*/g, '');
+                const jsonBlock = JSON.stringify(data, null, 2);
+                return `${reportText}\n\n--- STRUCTURED RECORD (JSON) ---\n${jsonBlock}\n`;
+            }
+
+            // Trigger Download of a File (Used for Zero-Setup Drive Fallback & CSV Batch Export)
+            function triggerFileDownload(filename, content, mimeType = 'text/plain;charset=utf-8') {
+                const blob = new Blob([content], { type: mimeType });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            // Google Drive API: Ensure "Class Feedback Logs" Folder Exists & Upload File
+            async function uploadToGoogleDriveAPI(accessToken, filename, fileContent, data) {
+                const folderName = 'Class Feedback Logs';
+
+                // 1. Search for existing folder
+                const query = encodeURIComponent(`name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
+                const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id,name)`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                if (!searchRes.ok) {
+                    throw new Error('Google Drive authorization expired or failed.');
+                }
+
+                const searchJson = await searchRes.json();
+                let folderId = searchJson.files && searchJson.files.length > 0 ? searchJson.files[0].id : null;
+
+                // 2. Create folder if not found
+                if (!folderId) {
+                    const createFolderRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+                        method: 'POST',
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: folderName,
+                            mimeType: 'application/vnd.google-apps.folder'
+                        })
+                    });
+                    if (!createFolderRes.ok) throw new Error('Unable to create "Class Feedback Logs" folder in Drive.');
+                    const folderData = await createFolderRes.json();
+                    folderId = folderData.id;
+                }
+
+                // 3. Multipart Upload File into Folder
+                const metadata = {
+                    name: filename,
+                    mimeType: 'text/plain',
+                    parents: [folderId]
+                };
+
+                const boundary = '-------314159265358979323846';
+                const delimiter = `\r\n--${boundary}\r\n`;
+                const closeDelimiter = `\r\n--${boundary}--`;
+
+                const multipartBody =
+                    delimiter +
+                    'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+                    JSON.stringify(metadata) +
+                    delimiter +
+                    'Content-Type: text/plain; charset=UTF-8\r\n\r\n' +
+                    fileContent +
+                    closeDelimiter;
+
+                const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': `multipart/related; boundary="${boundary}"`
+                    },
+                    body: multipartBody
+                });
+
+                if (!uploadRes.ok) {
+                    throw new Error('Failed uploading feedback file to Google Drive.');
+                }
+
+                return await uploadRes.json();
+            }
+
+            // Master Save to Google Drive Handler (Supports both Direct OAuth API & Zero-Setup Fallback)
+            function handleSaveToGoogleDrive(data, existingLogId = null) {
+                const safeSubject = (data.subjectName || 'Class').replace(/[^a-zA-Z0-9_-]/g, '_');
+                const filename = `Feedback_${data.date}_${safeSubject}_${Date.now().toString().slice(-4)}.txt`;
+                const fileContent = buildDriveFileContent(data);
+                const clientId = state.gdriveClientId.trim();
+
+                // Mode A: Direct Google Drive API via Google Identity Services OAuth 2.0
+                if (clientId && window.google && window.google.accounts && window.google.accounts.oauth2) {
+                    el.saveGdriveBtn.disabled = true;
+                    el.saveGdriveBtnText.textContent = 'Connecting to Google Drive...';
+
+                    try {
+                        const tokenClient = google.accounts.oauth2.initTokenClient({
+                            client_id: clientId,
+                            scope: 'https://www.googleapis.com/auth/drive.file',
+                            callback: async (tokenResponse) => {
+                                if (tokenResponse.error) {
+                                    el.saveGdriveBtn.disabled = false;
+                                    refreshSetupUI();
+                                    showToast(`Google Auth Error: ${tokenResponse.error}`, 'error');
+                                    return;
+                                }
+
+                                state.gdriveAccessToken = tokenResponse.access_token;
+                                el.saveGdriveBtnText.textContent = 'Uploading to Drive...';
+
+                                try {
+                                    const uploadedFile = await uploadToGoogleDriveAPI(
+                                        state.gdriveAccessToken,
+                                        filename,
+                                        fileContent,
+                                        data
+                                    );
+
+                                    if (!existingLogId) {
+                                        upsertHistoryLog(data, { driveSaved: true });
+                                    } else {
+                                        markLogDriveSaved(existingLogId);
+                                    }
+
+                                    const linkHtml = uploadedFile.webViewLink
+                                        ? `<a href="${uploadedFile.webViewLink}" target="_blank" rel="noopener noreferrer" class="underline font-bold text-emerald-300 shrink-0">Open File</a>`
+                                        : '';
+                                    showToast('Saved to "Class Feedback Logs" in Google Drive!', 'success', linkHtml);
+                                } catch (uploadErr) {
+                                    showToast(uploadErr.message || 'Drive upload failed.', 'error');
+                                } finally {
+                                    el.saveGdriveBtn.disabled = false;
+                                    refreshSetupUI();
+                                }
+                            }
+                        });
+
+                        tokenClient.requestAccessToken({ prompt: state.gdriveAccessToken ? '' : 'consent' });
+                    } catch (err) {
+                        el.saveGdriveBtn.disabled = false;
+                        refreshSetupUI();
+                        showToast('Invalid Google OAuth Client ID. Falling back to file export.', 'error');
+                        runZeroSetupDriveExport(filename, fileContent, data, existingLogId);
+                    }
+                } else {
+                    // Mode B: Zero-Setup Instant Export & Google Drive Portal Launcher
+                    runZeroSetupDriveExport(filename, fileContent, data, existingLogId);
+                }
+            }
+
+            // Execute Zero-Setup Drive Export + Open Helper Modal
+            function runZeroSetupDriveExport(filename, fileContent, data, existingLogId) {
+                triggerFileDownload(filename, fileContent, 'text/plain;charset=utf-8');
+                copyToClipboard(formatWhatsAppReport(data));
+
+                if (!existingLogId) {
+                    upsertHistoryLog(data, { driveSaved: true });
+                } else {
+                    markLogDriveSaved(existingLogId);
+                }
+
+                el.downloadedFilenameLabel.textContent = `File: ${filename}`;
+                el.driveFallbackModal.classList.remove('hidden');
+                el.driveFallbackModal.classList.add('flex');
+            }
+
+            // Mark an existing history card as Saved to Drive
+            function markLogDriveSaved(logId) {
+                const found = state.logs.find(item => item.id === logId);
+                if (found) {
+                    found.driveSaved = true;
+                    localStorage.setItem(KEYS.FEEDBACK_LOGS, JSON.stringify(state.logs));
+                    renderHistory();
+                }
+            }
+
+            // Batch Export All Logs as CSV for Google Drive Backup
+            function exportAllLogsAsCSV() {
+                if (state.logs.length === 0) {
+                    showToast('No feedback logs available to export yet.', 'info');
+                    return;
+                }
+
+                const headers = [
+                    'Date',
+                    'Period Slot',
+                    'Student Name',
+                    'Roll No',
+                    'Class/Batch',
+                    'Subject',
+                    'Faculty',
+                    'Rating (1-5)',
+                    'Topic Clarity',
+                    'Teaching Pace',
+                    'Highlights',
+                    'Key Takeaway',
+                    'Doubts/Suggestions'
+                ];
+
+                const csvEscape = (val) => `"${String(val || '').replace(/"/g, '""')}"`;
+
+                const rows = state.logs.map(log => {
+                    const d = log.data;
+                    return [
+                        d.date,
+                        d.periodSlot,
+                        d.studentName,
+                        d.rollNumber,
+                        d.classBatch,
+                        d.subjectName,
+                        d.facultyName,
+                        d.rating,
+                        d.clarity,
+                        d.pace,
+                        (d.tags || []).join('; '),
+                        d.keyTakeaway,
+                        d.doubtsSuggestions
+                    ].map(csvEscape).join(',');
+                });
+
+                const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+                const filename = `Student_Class_Feedback_Logs_${new Date().toISOString().slice(0, 10)}.csv`;
+
+                triggerFileDownload(filename, csvContent, 'text/csv;charset=utf-8;');
+                el.downloadedFilenameLabel.textContent = `Batch CSV: ${filename}`;
+                el.driveFallbackModal.classList.remove('hidden');
+                el.driveFallbackModal.classList.add('flex');
+            }
+
+            // Bind All Interactive Event Listeners
+            function bindEvents() {
+                // Toggle Setup Drawer
+                el.toggleSetupBtn.addEventListener('click', () => {
+                    el.setupDrawer.classList.toggle('hidden');
+                });
+
+                // Save Admin WhatsApp Number
+                el.saveAdminPhoneBtn.addEventListener('click', () => {
+                    const raw = el.adminPhoneInput.value.trim();
+                    const digits = cleanPhoneDigits(raw);
+                    if (digits.length < 7) {
+                        showToast('Enter a valid WhatsApp number with country code (e.g. +919876543210).', 'error');
+                        return;
+                    }
+                    state.adminPhone = raw.startsWith('+') ? raw : `+${digits}`;
+                    el.adminPhoneInput.value = state.adminPhone;
+                    localStorage.setItem(KEYS.ADMIN_PHONE, state.adminPhone);
+                    refreshSetupUI();
+                    showToast('Admin WhatsApp number saved!', 'success');
+                });
+
+                // Save Google Drive Client ID
+                el.saveGdriveIdBtn.addEventListener('click', () => {
+                    const val = el.gdriveClientIdInput.value.trim();
+                    state.gdriveClientId = val;
+                    state.gdriveAccessToken = null;
+                    localStorage.setItem(KEYS.GDRIVE_CLIENT_ID, val);
+                    refreshSetupUI();
+                    showToast(
+                        val ? 'Google OAuth Client ID saved! Direct Drive upload enabled.' : 'Switched to Zero-Setup Instant Export mode.',
+                        'success'
+                    );
+                });
+
+                // Anonymous Toggle
+                el.anonymousToggle.addEventListener('change', (e) => {
+                    applyAnonymousState(e.target.checked);
+                    persistStudentProfile();
+                    updatePreview();
+                });
+
+                // Live Preview Inputs
+                [
+                    el.classDate,
+                    el.periodSlot,
+                    el.studentName,
+                    el.rollNumber,
+                    el.classBatch,
+                    el.subjectName,
+                    el.facultyName,
+                    el.keyTakeaway,
+                    el.doubtsSuggestions
+                ].forEach(input => {
+                    input.addEventListener('input', () => {
+                        if (input === el.studentName || input === el.rollNumber || input === el.classBatch) {
+                            persistStudentProfile();
+                        }
+                        updatePreview();
+                    });
+                });
+
+                // Star Rating Buttons
+                el.starBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        renderStars(parseInt(btn.dataset.rating, 10));
+                        updatePreview();
+                    });
+                });
+
+                // Clarity Selector Buttons
+                el.clarityBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        el.clarityBtns.forEach(b => {
+                            b.className = 'clarity-btn p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs font-semibold flex flex-col items-center gap-1.5 transition cursor-pointer';
+                        });
+                        btn.className = 'clarity-btn p-3 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-indigo-900 text-xs font-bold flex flex-col items-center gap-1.5 transition cursor-pointer';
+                        state.clarity = btn.dataset.value;
+                        updatePreview();
+                    });
+                });
+
+                // Teaching Pace Buttons
+                el.paceBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        el.paceBtns.forEach(b => {
+                            b.className = 'pace-btn py-2.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 text-xs sm:text-sm font-semibold transition cursor-pointer';
+                        });
+                        btn.className = 'pace-btn py-2.5 px-3 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-bold transition cursor-pointer';
+                        state.pace = btn.dataset.value;
+                        updatePreview();
+                    });
+                });
+
+                // Quick Aspect Multi-select Tags
+                el.tagPills.forEach(pill => {
+                    pill.addEventListener('click', () => {
+                        const tag = pill.dataset.tag;
+                        if (state.selectedTags.has(tag)) {
+                            state.selectedTags.delete(tag);
+                            pill.className = 'tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer';
+                        } else {
+                            state.selectedTags.add(tag);
+                            pill.className = 'tag-pill px-3.5 py-2 rounded-xl border border-indigo-300 bg-indigo-50 text-indigo-800 text-xs font-semibold transition cursor-pointer';
+                        }
+                        updatePreview();
+                    });
+                });
+
+                // Copy Buttons
+                el.copyPreviewBtn.addEventListener('click', () => copyToClipboard(el.whatsappPreviewBox.textContent));
+                el.copyFeedbackBtn.addEventListener('click', () => copyToClipboard(el.whatsappPreviewBox.textContent));
+
+                // Primary CTA 1: Send to Admin on WhatsApp
+                el.sendWhatsappBtn.addEventListener('click', () => {
+                    if (!validateInputs(true)) return;
+                    const data = collectFormData();
+                    const msg = formatWhatsAppReport(data);
+                    if (sendViaWhatsApp(msg)) {
+                        upsertHistoryLog(data, { whatsappSent: true });
+                        showToast('Opening WhatsApp & logged feedback!', 'success');
+                    }
+                });
+
+                // Primary CTA 2: Save to Google Drive
+                el.saveGdriveBtn.addEventListener('click', () => {
+                    if (!validateInputs(false)) return;
+                    const data = collectFormData();
+                    handleSaveToGoogleDrive(data);
+                });
+
+                // Secondary: Save to Local History Only
+                el.saveHistoryBtn.addEventListener('click', () => {
+                    if (!validateInputs(false)) return;
+                    const data = collectFormData();
+                    upsertHistoryLog(data);
+                    showToast('Feedback saved to local history!', 'success');
+                });
+
+                // Secondary: Clear Form (Preserves Student Profile & Admin Config)
+                el.clearFormBtn.addEventListener('click', () => {
+                    el.periodSlot.value = '';
+                    el.subjectName.value = '';
+                    el.facultyName.value = '';
+                    el.keyTakeaway.value = '';
+                    el.doubtsSuggestions.value = '';
+                    setTodayDate();
+                    renderStars(5);
+                    el.clarityBtns[0].click();
+                    el.paceBtns[1].click();
+
+                    state.selectedTags.clear();
+                    el.tagPills.forEach(p => {
+                        p.className = 'tag-pill px-3.5 py-2 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 text-slate-600 text-xs font-medium transition cursor-pointer';
+                    });
+
+                    updatePreview();
+                    showToast('Form reset for your next class.', 'info');
+                });
+
+                // Drive Fallback Modal Controls
+                el.closeDriveModalBtn.addEventListener('click', () => {
+                    el.driveFallbackModal.classList.add('hidden');
+                    el.driveFallbackModal.classList.remove('flex');
+                });
+
+                el.switchToOauthSetupBtn.addEventListener('click', () => {
+                    el.driveFallbackModal.classList.add('hidden');
+                    el.driveFallbackModal.classList.remove('flex');
+                    el.setupDrawer.classList.remove('hidden');
+                    el.gdriveClientIdInput.focus();
+                });
+
+                // History Card Actions
+                el.historyGrid.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button[data-action]');
+                    if (!btn) return;
+                    const action = btn.dataset.action;
+                    const id = btn.dataset.id;
+                    const item = state.logs.find(l => l.id === id);
+                    if (!item) return;
+
+                    if (action === 'whatsapp') {
+                        if (sendViaWhatsApp(item.formattedMessage)) {
+                            item.whatsappSent = true;
+                            localStorage.setItem(KEYS.FEEDBACK_LOGS, JSON.stringify(state.logs));
+                            renderHistory();
+                        }
+                    } else if (action === 'drive') {
+                        handleSaveToGoogleDrive(item.data, item.id);
+                    } else if (action === 'delete') {
+                        askConfirmation(
+                            'Delete Feedback Entry',
+                            'Remove this submitted feedback record from your local history?',
+                            () => {
+                                state.logs = state.logs.filter(l => l.id !== id);
+                                localStorage.setItem(KEYS.FEEDBACK_LOGS, JSON.stringify(state.logs));
+                                renderHistory();
+                                showToast('Feedback entry removed.', 'info');
+                            }
+                        );
+                    }
+                });
+
+                // Batch Export CSV for Google Drive
+                el.exportAllCsvDriveBtn.addEventListener('click', exportAllLogsAsCSV);
+
+                // Clear All History
+                el.clearHistoryBtn.addEventListener('click', () => {
+                    askConfirmation(
+                        'Clear All Feedback History',
+                        'This will delete all saved feedback logs from this browser. Have you exported them to Google Drive first?',
+                        () => {
+                            state.logs = [];
+                            localStorage.removeItem(KEYS.FEEDBACK_LOGS);
+                            renderHistory();
+                            showToast('All local logs cleared.', 'info');
+                        }
+                    );
+                });
+            }
+
+            // Boot Application
+            function init() {
+                setTodayDate();
+                loadFromStorage();
+                renderStars(5);
+                bindEvents();
+                updatePreview();
+                renderHistory();
+            }
+
+            init();
+        })();
+    </script>
+</body>
+</html>
